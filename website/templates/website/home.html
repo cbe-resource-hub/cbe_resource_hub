@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Free CBC Learning Resources for Kenyan Students{% endblock %}
+
+{% block content %}
+
+{# ═══════════════════════════════════════════ HERO ═══════════════════════════ #}
+<section class="relative overflow-hidden">
+  {# Ambient glow #}
+  <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-brand-primary/20 blur-3xl"></div>
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-accent text-xs font-medium mb-6">
+      <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-accent opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-brand-accent"></span></span>
+      100% Free &bull; Open Source &bull; CBC Aligned
+    </div>
+
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight mb-6">
+      Free CBC Resources<br>
+      <span class="bg-gradient-to-r from-brand-primary to-brand-accent bg-clip-text text-transparent">for Every Kenyan Learner</span>
+    </h1>
+    <p class="max-w-2xl mx-auto text-lg text-white/60 leading-relaxed mb-10">
+      Download curriculum-aligned worksheets, lesson plans, and revision materials
+      for all grades — Pre-Primary to Senior Secondary. No sign-up required.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="{% url 'resources:list' %}"
+         class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-brand-primary hover:bg-blue-600 text-white font-semibold text-sm transition-all shadow-xl shadow-brand-primary/30 hover:scale-105">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16"/>
+        </svg>
+        Browse All Resources
+      </a>
+      <a href="#levels"
+         class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm transition-all hover:scale-105">
+        Browse by Level
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════ STATS STRIP ════════════════════ #}
+<section class="border-y border-white/5 bg-white/[0.02]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <dl class="grid grid-cols-2 sm:grid-cols-3 gap-6 text-center">
+      <div>
+        <dt class="text-xs text-white/40 uppercase tracking-widest mb-1">Resources</dt>
+        <dd class="text-3xl font-bold text-white">{{ total_resources }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-white/40 uppercase tracking-widest mb-1">Education Levels</dt>
+        <dd class="text-3xl font-bold text-white">{{ total_levels }}</dd>
+      </div>
+      <div class="col-span-2 sm:col-span-1">
+        <dt class="text-xs text-white/40 uppercase tracking-widest mb-1">Learning Areas</dt>
+        <dd class="text-3xl font-bold text-white">{{ total_areas }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════ FEATURED RESOURCES ═════════════ #}
+{% if featured_resources %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <h2 class="text-2xl font-bold text-white">Latest Resources</h2>
+      <p class="text-sm text-white/50 mt-1">Freshly added, curriculum-aligned materials</p>
+    </div>
+    <a href="{% url 'resources:list' %}" class="text-sm text-brand-accent hover:text-white transition-colors flex items-center gap-1">
+      View all
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    {% for resource in featured_resources %}
+    <article class="group relative flex flex-col rounded-2xl bg-white/5 border border-white/10 hover:border-brand-primary/50 hover:bg-white/8 transition-all duration-300 overflow-hidden shadow-md hover:shadow-brand-primary/10 hover:shadow-lg">
+      <div class="h-1 bg-gradient-to-r from-brand-primary to-brand-accent"></div>
+      <div class="p-5 flex flex-col flex-1 gap-3">
+        <div class="flex flex-wrap gap-1.5">
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-brand-primary/15 text-brand-accent">{{ resource.learning_area.name }}</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-white/8 text-white/60">{{ resource.grade.name }}</span>
+        </div>
+        <h3 class="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-brand-accent transition-colors">
+          <a href="{{ resource.get_absolute_url }}" class="stretched-link after:absolute after:inset-0">{{ resource.title }}</a>
+        </h3>
+        <p class="text-xs text-white/40 line-clamp-2 flex-1">{{ resource.description }}</p>
+        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-white/30">
+          <span>{{ resource.grade.level.name }}</span>
+          <span class="flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            {{ resource.downloads }}
+          </span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ═══════════════════════════════════════════ BROWSE BY LEVEL ═══════════════ #}
+{% if education_levels %}
+<section id="levels" class="bg-white/[0.02] border-t border-white/5">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl font-bold text-white mb-2">Browse by Education Level</h2>
+    <p class="text-sm text-white/50 mb-8">Find resources aligned to your child's curriculum stage</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for level in education_levels %}
+      <a href="{% url 'resources:list' %}?level={{ level.pk }}"
+         class="group flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/10 hover:border-brand-primary/40 hover:bg-white/8 transition-all duration-200">
+        <div class="w-10 h-10 rounded-xl bg-brand-primary/15 flex items-center justify-center text-brand-accent text-lg font-bold shrink-0">
+          {{ forloop.counter }}
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-white group-hover:text-brand-accent transition-colors truncate">{{ level.name }}</p>
+          <p class="text-xs text-white/40 mt-0.5">{{ level.grades.count }} grade{{ level.grades.count|pluralize }}</p>
+        </div>
+        <svg class="w-4 h-4 text-white/20 group-hover:text-brand-accent ml-auto shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ═══════════════════════════════════════════ CTA STRIP ══════════════════════ #}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+  <div class="relative rounded-3xl overflow-hidden bg-gradient-to-br from-brand-primary/30 to-brand-secondary border border-brand-primary/20 p-10 text-center">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="absolute bottom-0 right-0 w-64 h-64 bg-brand-accent/10 rounded-full blur-3xl"></div>
+    </div>
+    <h2 class="text-3xl font-bold text-white mb-3 relative">Ready to start learning?</h2>
+    <p class="text-white/60 mb-8 relative max-w-xl mx-auto">
+      Every resource is free, open-source, and aligned to the Kenyan CBC curriculum.
+      No account needed — just click and download.
+    </p>
+    <a href="{% url 'resources:list' %}"
+       class="relative inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-white text-brand-secondary font-bold text-sm hover:bg-white/90 transition-all shadow-xl hover:scale-105">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+      </svg>
+      Browse All Resources
+    </a>
+  </div>
+</section>
+
+{% endblock %}

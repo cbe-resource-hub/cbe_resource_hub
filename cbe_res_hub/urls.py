@@ -6,31 +6,37 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from website.views import HomePageView
+
 urlpatterns = [
-    # ── Django admin ────────────────────────────────────────────────────────
+    # ── Root ────────────────────────────────────────────────────────────────
+    path("", HomePageView.as_view(), name="home"),
+
+    # ── Django admin ─────────────────────────────────────────────────────────
     path("admin/", admin.site.urls),
 
-    # ── Authentication (allauth — login, sign-up, password reset, Google OAuth)
+    # ── Authentication (allauth — login, sign-up, password, Google OAuth) ────
     path("accounts/", include("allauth.urls")),
 
-    # ── CMS static pages (/, /pages/<slug>/)
-    path("", include("cms.urls")),
+    # ── Account dashboard / profile ──────────────────────────────────────────
+    path("account/", include("accounts.urls", namespace="accounts")),
 
-    # ── CBC resources (/resources/)
+    # ── CBC resources (/resources/) ──────────────────────────────────────────
     path("resources/", include("resources.urls")),
 
-    # ── TinyMCE (rich-text editor for CMS admin)
+    # ── CMS pages (/pages/<slug>/) ───────────────────────────────────────────
+    path("pages/", include("cms.urls")),
+
+    # ── TinyMCE ──────────────────────────────────────────────────────────────
     path("tinymce/", include("tinymce.urls")),
 
-    # ── Silk profiler (dev only — gated below)
+    # ── Silk profiler ────────────────────────────────────────────────────────
     path("silk/", include("silk.urls", namespace="silk")),
 ]
 
-# ── Development extras ───────────────────────────────────────────────────────
+# ── Development only ─────────────────────────────────────────────────────────
 if settings.DEBUG:
-    # Serve user-uploaded media files locally
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-    # Django Debug Toolbar
     import debug_toolbar  # noqa: PLC0415
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
