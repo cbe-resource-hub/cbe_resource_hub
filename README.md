@@ -22,6 +22,9 @@
 - **File Storage** — Cloudflare R2 (S3-compatible) in production; local filesystem in development
 - **Built-in Rate Limiting** — `django-smart-ratelimit` + `django-axes` brute-force protection
 - **Performance** — Query profiling via Silk, async-ready with Django 6 ASGI
+- **Global Toast Notifications** — Alpine.js system auto-fires Django messages; also JS-dispatchable from any page
+- **Dynamic Menus** — CMS-driven header & footer navigation, zero code changes needed
+- **Contact Page** — Full form with email delivery, honeypot anti-spam, and animated responsive UI
 
 ---
 
@@ -176,11 +179,53 @@ Visit: http://localhost:8000
 |-----|-------------|
 | `/` | Public homepage with resource browser |
 | `/resources/` | Searchable resource catalogue |
+| `/contact/` | Contact form |
 | `/management/` | Custom admin panel (Admin/Superuser only) |
 | `/accounts/login/` | Email login page |
 | `/accounts/signup/` | Registration |
 | `/accounts/social/login/google/` | Google OAuth entry |
 | `/account/password/change/` | Password change (forced on first admin-created login) |
+| `/pages/<slug>/` | CMS static pages |
+
+---
+
+## 🍽️ Menu System
+
+Navigation menus are **100% database-driven** — no code changes needed.
+
+### Setup in 3 steps
+
+1. **Admin Panel → Menus → + Add Menu** — use one of the reserved slot names:
+
+   | Menu Name | Where it renders |
+   |-----------|-----------------|
+   | `primary_header` | Desktop & mobile header navigation |
+   | `footer` | Footer quick-links column |
+
+2. **Admin Panel → Menu Items → + Add Menu Item** — fill in Title, URL, and Order
+
+3. **Dropdown support**: Set a parent item's URL to `#`, then point child items to it. The header auto-renders them as an animated dropdown.
+
+> Full examples and field reference: [docs/MENUS.md](./docs/MENUS.md)
+
+---
+
+## 🔔 Global Notification System
+
+All `django.contrib.messages` notifications automatically display as animated toast popups on every page — no extra template code needed.
+
+**Trigger from JavaScript anywhere:**
+
+```js
+window.dispatchEvent(new CustomEvent('notify', {
+  detail: {
+    type: 'success',   // 'success' | 'error' | 'warning' | 'info'
+    message: 'Done! Your changes have been saved.'
+  }
+}))
+```
+
+Toasts auto-dismiss after 5 seconds with an animated progress bar. Users can also dismiss them manually.
 
 ---
 

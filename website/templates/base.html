@@ -102,6 +102,7 @@
         <nav class="hidden md:flex items-center gap-6" aria-label="Main navigation">
           <a href="{% url 'home' %}" class="text-sm text-white/70 hover:text-white transition-colors">Home</a>
           <a href="{% url 'resources:list' %}" class="text-sm text-white/70 hover:text-white transition-colors">Resources</a>
+          <a href="{% url 'contact' %}" class="text-sm text-white/70 hover:text-white transition-colors">Contact</a>
 
           <!-- CMS-driven menu items -->
           {% with primary=menus.primary_header %}
@@ -203,6 +204,7 @@
     <div x-show="mobileMenuOpen" x-transition class="md:hidden border-t border-white/10 bg-brand-secondary/95 backdrop-blur px-4 py-4 space-y-1">
       <a href="{% url 'home' %}" class="block py-2 text-sm text-white/80 hover:text-white transition-colors">Home</a>
       <a href="{% url 'resources:list' %}" class="block py-2 text-sm text-white/80 hover:text-white transition-colors">Resources</a>
+      <a href="{% url 'contact' %}" class="block py-2 text-sm text-white/80 hover:text-white transition-colors">Contact</a>
       {% with primary=menus.primary_header %}{% if primary %}
       {% for item in primary.items.all %}{% if not item.parent %}
       <a href="{{ item.url }}" class="block py-2 text-sm text-white/80 hover:text-white transition-colors">{{ item.title }}</a>
@@ -268,10 +270,14 @@
         <div>
           <h3 class="text-sm font-semibold text-white/70 uppercase tracking-wider mb-3">Contact</h3>
           {% if site_settings.support_email %}
-          <a href="mailto:{{ site_settings.support_email }}" class="text-sm text-white/50 hover:text-white transition-colors">
+          <a href="mailto:{{ site_settings.support_email }}" class="block text-sm text-white/50 hover:text-white transition-colors mb-2">
             {{ site_settings.support_email }}
           </a>
           {% endif %}
+          <a href="{% url 'contact' %}" class="inline-flex items-center gap-1.5 text-sm text-brand-primary hover:text-brand-accent transition-colors font-medium">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            Contact Form
+          </a>
         </div>
 
       </div>
@@ -303,9 +309,12 @@
     });
   </script>
   
-  <!-- Global Admin Modals -->
+  <!-- Global Notification Toasts (Django messages + JS dispatch) -->
+  {% include "partials/_notifications.html" %}
+
+  <!-- Global Admin Delete Modal -->
   {% include "admin/partials/_delete_modal.html" %}
-  
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

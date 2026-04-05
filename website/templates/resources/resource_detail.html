@@ -34,9 +34,10 @@
       </div>
 
       <h1 class="text-2xl font-bold text-white mb-3">{{ resource.title }}</h1>
-      <p class="text-white/60 leading-relaxed mb-8">{{ resource.description }}</p>
+      <article class="text-white/60 leading-relaxed mb-8">{{ resource.description|safe }}</article>
 
       <!-- Download button -->
+      {% if resource.file %}
       <a href="{{ resource.file.url }}"
          download
          class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-semibold text-sm transition-colors shadow-lg shadow-brand-primary/30">
@@ -46,6 +47,9 @@
         </svg>
         Download Resource
       </a>
+      {% else %}
+      <p class="text-white/60 leading-relaxed mb-8">No file available for download</p>
+      {% endif %}
 
       <p class="mt-4 text-xs text-white/30">
         {{ resource.downloads }} download{{ resource.downloads|pluralize }} &bull;

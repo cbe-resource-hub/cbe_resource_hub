@@ -6,11 +6,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from website.views import HomePageView
+from website.views import ContactView, HomePageView
 
 urlpatterns = [
     # ── Root ────────────────────────────────────────────────────────────────
     path("", HomePageView.as_view(), name="home"),
+    path("contact/", ContactView.as_view(), name="contact"),
 
     # ── Django admin ─────────────────────────────────────────────────────────
     path("admin/", admin.site.urls),
