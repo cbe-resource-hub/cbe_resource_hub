@@ -15,13 +15,14 @@ from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import ResourceItemForm
 
-from .models import EducationLevel, Grade, LearningArea, ResourceItem
+from .models import EducationLevel, LearningArea, ResourceItem
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -68,13 +69,16 @@ class ResourceListView(ListView):
             .filter(is_free=True)  # default: show free resources; extend for marketplace
             .order_by("-created_at")
         )
+        print(qs)
 
         # --- Optional filtering via GET params ---
         grade_id = self.request.GET.get("grade")
         resource_type = self.request.GET.get("resource_type")
+        resource_type = str(resource_type) if resource_type else None
         area_id = self.request.GET.get("area")
         level_id = self.request.GET.get("level")
-        q = self.request.GET.get("q", "").strip()
+        q = self.request.GET.get("q")
+        q = q.strip() if q else None
 
         if grade_id:
             qs = qs.filter(grade_id=grade_id)
@@ -86,6 +90,7 @@ class ResourceListView(ListView):
             qs = qs.filter(title__icontains=q)
         if resource_type:
             qs = qs.filter(resource_type=resource_type)
+        print(qs)
 
         return qs
 
@@ -93,11 +98,12 @@ class ResourceListView(ListView):
         context = super().get_context_data(**kwargs)
         context["education_levels"] = EducationLevel.objects.prefetch_related("grades").order_by("order")
         context["learning_areas"] = LearningArea.objects.order_by("name")
+        context["resource_types"] = dict(ResourceItem._meta.get_field("resource_type").choices)
         context["current_grade"] = self.request.GET.get("grade", "")
         context["current_area"] = self.request.GET.get("area", "")
         context["current_level"] = self.request.GET.get("level", "")
         context["search_query"] = self.request.GET.get("q", "")
-        context["resource_type"] = self.request.GET.get("resource_type", "")
+        context["current_resource_type"] = self.request.GET.get("resource_type", "")
         
         # Pre-fetch user favorites to avoid N+1 queries in the template
         if self.request.user.is_authenticated:
@@ -146,11 +152,6 @@ class ResourceDetailView(DetailView):
         obj: ResourceItem = super().get_object(queryset)
         obj.increment_downloads()
         return obj
-
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
 
 
 class ToggleFavoriteView(LoginRequiredMixin, DetailView):

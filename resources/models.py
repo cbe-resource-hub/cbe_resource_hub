@@ -108,6 +108,8 @@ class ResourceItem(models.Model):
     included now for zero-migration cost when the marketplace is activated.
     """
 
+    
+
     title: str = models.CharField(max_length=255)
     slug: str = models.SlugField(
         unique=True,

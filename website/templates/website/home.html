@@ -92,7 +92,7 @@
         <h3 class="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-brand-accent transition-colors">
           <a href="{{ resource.get_absolute_url }}" class="stretched-link after:absolute after:inset-0">{{ resource.title }}</a>
         </h3>
-        <p class="text-xs text-white/40 line-clamp-2 flex-1">{{ resource.description }}</p>
+        <article class="text-xs text-white/40 line-clamp-2 flex-1">{{ resource.description|safe }}</article>
         <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-white/30">
           <span>{{ resource.grade.level.name }}</span>
           <span class="flex items-center gap-1">

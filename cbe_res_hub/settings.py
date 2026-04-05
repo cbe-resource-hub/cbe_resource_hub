@@ -42,7 +42,7 @@ from sentry_sdk.integrations.django import DjangoIntegration
 load_dotenv()
 
 # ── Resolve environment first so everything below can reference it ────────────
-environment: str = os.getenv("ENVIRONMENT", "development")
+environment: str = os.getenv("ENVIRONMENT")
 _prod: bool = environment == "production"
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -299,28 +299,6 @@ if _private_r2 and _public_r2:
         },
     }
 
-elif _private_r2:
-    # ── Private bucket only (static still local) ──────────────────────────────
-    STORAGES = {
-        "default": {
-            "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-        "protected": {
-            "BACKEND": "helpers.cloudflare.storages.ProtectedMediaStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
-        },
-        "public_files": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "dbbackup": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": _BACKUP_R2_OPTIONS,
-        },
-    }
 
 else:
     # ── Local filesystem (development default) ────────────────────────────────
@@ -337,15 +315,8 @@ else:
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 8. STATIC & MEDIA URLs / Paths
-#
-#  In production with R2:
-#    • STATIC_URL  → CDN custom domain (e.g. https://cdn.example.com/static/)
-#    • MEDIA_URL   → Cloudflare R2 endpoint  (signed URLs generated per-object)
-#  In development:
-#    • STATIC_URL  → /static/   (served by Django's dev server)
-#    • MEDIA_URL   → /media/    (served via urls.py static() helper)
 # ──────────────────────────────────────────────────────────────────────────────
-STATIC_ROOT = BASE_DIR / "staticfiles"   # collectstatic target (local / CI)
+STATIC_ROOT = BASE_DIR / "static"   # collectstatic target (local / CI)
 
 STATICFILES_DIRS = [
     BASE_DIR / "website" / "static",     # Bun/Tailwind compiled output
@@ -358,26 +329,9 @@ STATICFILES_FINDERS = (
 
 MEDIA_ROOT = BASE_DIR / "media"          # local dev upload target
 
-if _public_r2:
-    # Static files served from CDN (custom domain) or raw R2 endpoint
-    _static_domain = _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS.get("custom_domain")
-    if _static_domain:
-        STATIC_URL = f"https://{_static_domain}/static/"
-    else:
-        _static_endpoint = _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS.get("endpoint_url", "")
-        _static_bucket   = _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS.get("bucket_name", "")
-        STATIC_URL = f"{_static_endpoint}/{_static_bucket}/static/"
-else:
-    STATIC_URL = "static/"               # Django dev server
+STATIC_URL = "static/" 
 
-if _private_r2:
-    # Media URLs are signed per-object by S3Boto3Storage — set a base that
-    # matches the private R2 endpoint so Django's url() calls resolve correctly.
-    _media_endpoint = _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS.get("endpoint_url", "")
-    _media_bucket   = _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS.get("bucket_name", "")
-    MEDIA_URL = f"{_media_endpoint}/{_media_bucket}/media/"
-else:
-    MEDIA_URL = "/media/"                # Django dev server
+MEDIA_URL = "/media/"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 9. AUTHENTICATION
@@ -386,7 +340,7 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 # allauth handles login/logout — point Django's built-ins at allauth's views
 LOGIN_URL          = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "/"
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -473,7 +427,7 @@ USE_TZ = True
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST: str = os.getenv("EMAIL_HOST")
 EMAIL_PORT: int = int(os.getenv("EMAIL_PORT"))
-_email_tls = os.getenv("EMAIL_USE_TLS", "true")
+_email_tls = os.getenv("EMAIL_USE_TLS")
 EMAIL_USE_TLS: bool = ast.literal_eval(_email_tls) if _email_tls else True
 EMAIL_HOST_USER: str = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD: str = os.getenv("EMAIL_HOST_PASSWORD")
@@ -688,7 +642,7 @@ AXES_RESET_ON_SUCCESS: bool = True
 # ──────────────────────────────────────────────────────────────────────────────
 RATELIMIT_BACKEND = "redis" if _redis_url else "cache"
 RATELIMIT_REDIS = {
-    "host": os.getenv("REDIS_HOST", "localhost"),
+    "host": os.getenv("REDIS_HOST"),
     "port": 6379,
     "db": 4,
     "password": _redis_password or None,
@@ -724,8 +678,8 @@ if os.getenv("SENTRY_DSN"):
 # TinyMCE rich-text editor (used in CMS Page admin)
 TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
-    "height": 500,
-    "width": 800,
+    "height": 800,
+    "width": 650,
     "menubar": "file edit view insert format tools table help",
     "plugins": (
         "accordion autosave autoresize advlist autolink lists link image charmap "

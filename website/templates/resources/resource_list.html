@@ -28,7 +28,7 @@
     <div class="flex-1 min-w-[200px]">
       <label for="id_q" class="block text-xs text-white/50 mb-1">Search</label>
       <input id="id_q" type="search" name="q" value="{{ search_query }}"
-             placeholder="e.g. Fractions worksheet…"
+             placeholder="e.g. Integrated Science Notes…"
              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-primary transition" />
     </div>
 
@@ -67,8 +67,8 @@
               class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition">
         <option value="">All Types</option>
         {% for resource_type in resource_types %}
-        <option value="{{ resource_type.pk }}" {% if current_resource_type == resource_type.pk|stringformat:"s" %}selected{% endif %}>
-          {{ resource_type.name }}
+        <option value="{{ resource_type }}" {% if current_resource_type == resource_type|stringformat:"s" %}selected{% endif %}>
+          {{ resource_type }}
         </option>
         {% endfor %}
       </select>

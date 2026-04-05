@@ -3,7 +3,7 @@ website/forms/contact.py
 Contact form with honeypot field for bot protection.
 """
 from django import forms
-
+from phonenumber_field.formfields import PhoneNumberField
 
 class ContactForm(forms.Form):
     name = forms.CharField(
@@ -12,6 +12,10 @@ class ContactForm(forms.Form):
     )
     email = forms.EmailField(
         widget=forms.EmailInput(attrs={"placeholder": "your@email.com", "autocomplete": "email"}),
+    )
+    phone = PhoneNumberField(
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "+254 7XX XXX XXX (optional)", "autocomplete": "tel"}),
     )
     subject = forms.CharField(
         max_length=200,
@@ -27,3 +31,4 @@ class ContactForm(forms.Form):
         if self.cleaned_data.get("website_url"):
             raise forms.ValidationError("Bot detected.")
         return ""
+

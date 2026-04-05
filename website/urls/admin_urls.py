@@ -66,4 +66,9 @@ urlpatterns = [
     path("menuitems/add/", dep_views.AdminMenuItemCreateView.as_view(), name="menuitem_add"),
     path("menuitems/<int:pk>/edit/", dep_views.AdminMenuItemUpdateView.as_view(), name="menuitem_edit"),
     path("menuitems/<int:pk>/delete/", dep_views.AdminMenuItemDeleteView.as_view(), name="menuitem_delete"),
+
+    # Contact Messages
+    path("contacts/", views.AdminContactMessageListView.as_view(), name="contact_list"),
+    path("contacts/<int:pk>/", views.AdminContactMessageDetailView.as_view(), name="contact_detail"),
+    path("contacts/<int:pk>/delete/", views.AdminContactMessageDeleteView.as_view(), name="contact_delete"),
 ]

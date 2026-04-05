@@ -26,6 +26,7 @@
         </a>
         {% endif %}
       </div>
+      {{ form.media }}
 
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}

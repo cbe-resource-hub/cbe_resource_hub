@@ -26,7 +26,7 @@
   </script>
 
   <!-- Simple-DataTables (Frontend Interaction) -->
-  <link href="{% static 'css/simple-datatables.css' %}" rel="stylesheet">
+  <link href="{% static 'css/simple-datatables.min.css' %}" rel="stylesheet">
   
   <style>
     /* ── Dark theme for ALL native select elements ── */
@@ -286,13 +286,13 @@
         <p class="text-xs text-white/30">
           &copy; {% now "Y" %} {{ site_settings.site_name|default:'CBE Resource Hub' }}. Licensed under Apache 2.0.
         </p>
-        <p class="text-xs text-white/30">Built with ❤️ for Kenyan learners.</p>
+        <p class="text-xs text-white/30">Built for Kenyan learners.</p>
       </div>
     </div>
   </footer>
 
   <!-- Simple-DataTables script -->
-  <script src="{% static 'js/simple-datatables.js' %}" defer></script>
+  <script src="{% static 'js/simple-datatables.min.js' %}" defer></script>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       // Find elements wrapped in the Datatable pattern or with a specific ID.
@@ -316,5 +316,11 @@
   {% include "admin/partials/_delete_modal.html" %}
 
   {% block extra_scripts %}{% endblock %}
+  {% if not request.user.is_authenticated and site_settings and site_settings.google_oauth_client_id %}
+  <script async src="https://accounts.google.com/gsi/client"></script>
+    <div id="g_id_onload" data-client_id="{{ site_settings.google_oauth_client_id }}"
+         data-close_on_tap_outside="true" data-itp_support="true"
+         data-login_uri="{% url 'google_login_by_token' %}?next={{ request.get_full_path|urlencode }}"></div>
+  {% endif %}
 </body>
 </html>

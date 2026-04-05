@@ -124,4 +124,5 @@ class CustomUser(AbstractUser):
     @property
     def is_content_vendor(self) -> bool:
         """True if the user is flagged as a vendor or has the vendor role."""
-        return self.is_vendor or self.role == self.Role.VENDOR
+        return self.is_vendor or self.role == self.Role.VENDOR or \
+                self.is_superuser or self.role == self.Role.ADMIN

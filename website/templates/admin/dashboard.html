@@ -47,7 +47,7 @@
   {# System Architecture / Dependencies #}
   <div class="mb-12">
     <h2 class="text-lg font-semibold text-white mb-4">Architecture & Curriculum</h2>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <a href="{% url 'management:level_list' %}" class="p-4 rounded-xl bg-white/5 border border-white/8 hover:border-white/20 hover:bg-white/10 transition-all text-center group">
         <span class="block text-sm font-semibold text-white group-hover:text-brand-accent transition-colors">Education Levels</span>
       </a>
@@ -62,6 +62,12 @@
       </a>
       <a href="{% url 'management:menuitem_list' %}" class="p-4 rounded-xl bg-white/5 border border-white/8 hover:border-white/20 hover:bg-white/10 transition-all text-center group">
         <span class="block text-sm font-semibold text-white group-hover:text-brand-accent transition-colors">Menu Items</span>
+      </a>
+      <a href="{% url 'management:contact_list' %}" class="p-4 rounded-xl bg-white/5 border border-white/8 hover:border-white/20 hover:bg-white/10 transition-all text-center group relative">
+        <span class="block text-sm font-semibold text-white group-hover:text-brand-accent transition-colors">Contact Messages</span>
+        {% if unread_messages %}
+        <span class="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-brand-primary text-white text-[10px] font-bold shadow-lg">{{ unread_messages }}</span>
+        {% endif %}
       </a>
     </div>
   </div>
