@@ -6,12 +6,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from website.views import ContactView, HomePageView
-
 urlpatterns = [
     # ── Root ────────────────────────────────────────────────────────────────
-    path("", HomePageView.as_view(), name="home"),
-    path("contact/", ContactView.as_view(), name="contact"),
+    path("", include("website.urls.website_urls")),
 
     # ── Django admin ─────────────────────────────────────────────────────────
     path("admin/", admin.site.urls),
@@ -41,4 +38,5 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     import debug_toolbar  # noqa: PLC0415
+
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
