@@ -29,8 +29,6 @@ urlpatterns = [
     # ── TinyMCE ──────────────────────────────────────────────────────────────
     path("tinymce/", include("tinymce.urls")),
 
-    # ── Silk profiler ────────────────────────────────────────────────────────
-    path("silk/", include("silk.urls", namespace="silk")),
 ]
 
 # ── Development only ─────────────────────────────────────────────────────────
@@ -39,4 +37,10 @@ if settings.DEBUG:
 
     import debug_toolbar  # noqa: PLC0415
 
-    urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
+    urlpatterns += [
+        # ── Django Debug Toolbar ───────────────────────────────────────────────
+        path("__debug__/", include(debug_toolbar.urls)),
+        # ── Silk profiler ──────────────────────────────────────────────────────
+        path("silk/", include("silk.urls", namespace="silk")),
+
+    ]

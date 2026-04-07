@@ -2,8 +2,8 @@
   "name": "cbe_resource_hub_ui",
   "version": "0.1.0",
   "scripts": {
-    "dev": "bunx @tailwindcss/cli -i ./templates/src/input.css -o ./static/css/output.css --watch",
-    "build": "bunx @tailwindcss/cli -i ./templates/src/input.css -o ./static/css/output.css --minify"
+    "dev": "bunx @tailwindcss/cli -i ./static/css/src/input.css -o static/css/src/output.css --watch",
+    "build": "bunx @tailwindcss/cli -i ./static/css/input.css -o static/css/src/output.css --minify"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.2.2",

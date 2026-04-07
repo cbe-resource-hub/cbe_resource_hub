@@ -6,7 +6,7 @@ Sections:
     2.  Application Definition
     3.  Middleware
     4.  Templates
-    5.  Database  (PostgreSQL via DATABASE_URL)
+    5.  Database  (Postgres via DATABASE_URL)
     6.  Cache     (Redis prod | LocMemCache dev)
     7.  Storage   (Cloudflare R2 prod | Local dev)
     8.  Static & Media
@@ -27,6 +27,7 @@ Sections:
 from __future__ import annotations
 
 import ast
+import logging
 import os
 import ssl
 import sys
@@ -53,7 +54,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY: str = os.getenv("SECRET_KEY")
 
 debug_env = os.getenv("DEBUG", "False")
-DEBUG: bool = ast.literal_eval(debug_env) if debug_env else False
+DEBUG: bool = ast.literal_eval(debug_env) if debug_env or _prod else False
 
 allowed_hosts = os.getenv("ALLOWED_HOSTS")
 ALLOWED_HOSTS: list[str] = [h.strip() for h in allowed_hosts.split(",") if h.strip()]
@@ -71,7 +72,7 @@ INTERNAL_IPS: list[str] = ["127.0.0.1"]
 # 2. APPLICATION DEFINITION
 # ──────────────────────────────────────────────────────────────────────────────
 DEFAULT_APPS: list[str] = [
-    "daphne",                               # ASGI server — must be FIRST for channels
+    "daphne",  # ASGI server — must be FIRST for channels
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -89,7 +90,7 @@ THIRD_PARTY_APPS: list[str] = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
-    'slippers', 
+    'slippers',
     # Content / Forms
     "tinymce",
     "taggit",
@@ -101,12 +102,15 @@ THIRD_PARTY_APPS: list[str] = [
     "storages",
     # Security / Monitoring
     "axes",
-    "debug_toolbar",
     "django_smart_ratelimit",
     # DB backups
     "dbbackup",
+]
+
+LOCAL_APPS: list[str] = [
     # Silk profiler (dev)
     "silk",
+    "debug_toolbar",
 ]
 
 MY_APPS: list[str] = [
@@ -134,6 +138,9 @@ MIDDLEWARE: list[str] = [
     "axes.middleware.AxesMiddleware",
     "cbe_res_hub.middleware.ForcePasswordChangeMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+]
+
+LOCAL_MIDDLEWARE: list[str] = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "silk.middleware.SilkyMiddleware",
 ]
@@ -148,7 +155,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR / "website" / "templates",
+            BASE_DIR / "website/templates",
         ],
         "APP_DIRS": False,
         "OPTIONS": {
@@ -255,71 +262,27 @@ else:
 from helpers.cloudflare import settings as _cf_settings  # noqa: E402
 
 _private_r2 = bool(_cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS)
-_public_r2  = bool(_cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS)
+_public_r2 = bool(_cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS)
 
 # ── Backup bucket (shared config, independent of private/public buckets) ──────
 _BACKUP_R2_OPTIONS: dict = {
-    "access_key":    os.getenv("BACKUP_R2_ACCESS_KEY_ID"),
-    "secret_key":    os.getenv("BACKUP_R2_SECRET_ACCESS_KEY"),
-    "bucket_name":   os.getenv("BACKUP_R2_BUCKET_NAME"),
-    "region_name":   os.getenv("BACKUP_R2_REGION", "auto"),
-    "endpoint_url":  os.getenv("BACKUP_R2_ENDPOINT"),
-    "default_acl":   "private",
+    "access_key": os.getenv("BACKUP_R2_ACCESS_KEY_ID"),
+    "secret_key": os.getenv("BACKUP_R2_SECRET_ACCESS_KEY"),
+    "bucket_name": os.getenv("BACKUP_R2_BUCKET_NAME"),
+    "region_name": os.getenv("BACKUP_R2_REGION", "auto"),
+    "endpoint_url": os.getenv("BACKUP_R2_ENDPOINT"),
+    "default_acl": "private",
     "file_overwrite": False,
-    "location":      "database-backups",
+    "location": "database-backups",
 }
-
-if _private_r2 and _public_r2:
-    # ── Full dual-bucket production setup ─────────────────────────────────────
-    STORAGES = {
-        # Private media / resource file uploads  (signed URLs, 1-hour TTL)
-        "default": {
-            "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
-        },
-        # Static files (CSS, JS) served from public CDN bucket
-        "staticfiles": {
-            "BACKEND": "helpers.cloudflare.storages.StaticFileStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS,
-        },
-        # Protected uploads (e.g. admin-only docs) — private bucket, /protected/ prefix
-        "protected": {
-            "BACKEND": "helpers.cloudflare.storages.ProtectedMediaStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
-        },
-        # Publicly readable files (e.g. thumbnails, open resources) — public bucket
-        "public_files": {
-            "BACKEND": "helpers.cloudflare.storages.PublicFilesStorage",
-            "OPTIONS": _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS,
-        },
-        # Database backups — dedicated isolated bucket
-        "dbbackup": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": _BACKUP_R2_OPTIONS,
-        },
-    }
-
-
-else:
-    # ── Local filesystem (development default) ────────────────────────────────
-    STORAGES = {
-        "default":      {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles":  {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-        "protected":    {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "dbbackup": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": _BACKUP_R2_OPTIONS,
-        },
-    }
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 8. STATIC & MEDIA URLs / Paths
 # ──────────────────────────────────────────────────────────────────────────────
-STATIC_ROOT = BASE_DIR / "static"   # collectstatic target (local / CI)
+STATIC_ROOT = BASE_DIR / "static"  # collectstatic target (local / CI)
 
 STATICFILES_DIRS = [
-    BASE_DIR / "website" / "static",     # Bun/Tailwind compiled output
+    BASE_DIR / "website/static",  # Bun/Tailwind compiled output
 ]
 
 STATICFILES_FINDERS = (
@@ -327,9 +290,9 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-MEDIA_ROOT = BASE_DIR / "media"          # local dev upload target
+STATIC_URL = "static/"
 
-STATIC_URL = "static/" 
+MEDIA_ROOT = BASE_DIR / "media"  # local dev upload target
 
 MEDIA_URL = "/media/"
 
@@ -339,7 +302,7 @@ MEDIA_URL = "/media/"
 AUTH_USER_MODEL = "accounts.CustomUser"
 
 # allauth handles login/logout — point Django's built-ins at allauth's views
-LOGIN_URL          = "/accounts/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -363,10 +326,10 @@ SITE_ID: int = int(os.getenv("SITE_ID", "1"))
 
 # ── django-allauth core ───────────────────────────────────────────────────────
 # Email is the only login credential — username is internal / auto-generated.
-ACCOUNT_LOGIN_METHODS      = {"email"}              # email-only (no username field)
-ACCOUNT_SIGNUP_FIELDS      = ["email*", "password1*", "password2*"]
-ACCOUNT_UNIQUE_EMAIL       = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"      # we still have the column, just auto-filled
+ACCOUNT_LOGIN_METHODS = {"email"}  # email-only (no username field)
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"  # we still have the column, just autofilled
 
 # Email verification strategy
 # "mandatory" → user must click the link before logging in (recommended for prod)
@@ -374,21 +337,21 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"      # we still have the column, 
 # "none"      → skip entirely (fine for dev / social-only flows)
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "optional")
 
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True          # auto-login after clicking link
-ACCOUNT_SESSION_REMEMBER             = True         # persistent sessions by default
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # auto-login after clicking link
+ACCOUNT_SESSION_REMEMBER = True  # persistent sessions by default
 
 # Rate limits (per django-allauth v0.60+ format)
 ACCOUNT_RATE_LIMITS = {
-    "login_failed":      "5/5m/ip",
-    "change_password":   "3/m/user",
-    "reset_password":    "3/m/ip",
-    "signup":            "5/m/ip",
-    "confirm_email":     "3/m/user",
+    "login_failed": "5/5m/ip",
+    "change_password": "3/m/user",
+    "reset_password": "3/m/ip",
+    "signup": "5/m/ip",
+    "confirm_email": "3/m/user",
 }
 
 # ── Custom adapters ───────────────────────────────────────────────────────────
-ACCOUNT_ADAPTER        = "accounts.adapters.AccountAdapter"
-SOCIALACCOUNT_ADAPTER  = "accounts.adapters.SocialAccountAdapter"
+ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
 
 # ── allauth-UI theme ──────────────────────────────────────────────────────────
 ALLAUTH_UI_THEME = "dark"
@@ -398,20 +361,20 @@ SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
             "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-            "secret":    os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+            "secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
         },
-        "SCOPE":       ["profile", "email", "openid"],
+        "SCOPE": ["profile", "email", "openid"],
         "AUTH_PARAMS": {"access_type": "online"},
         "OAUTH_PKCE_ENABLED": True,
-        "FETCH_USERINFO":     True,
-        "EMAIL_AUTHENTICATION": True,          # match social email to local account
+        "FETCH_USERINFO": True,
+        "EMAIL_AUTHENTICATION": True,  # match social email to local account
     }
 }
 
 # Auto-connect social accounts to existing local accounts with the same email
-SOCIALACCOUNT_EMAIL_AUTHENTICATION              = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-SOCIALACCOUNT_LOGIN_ON_GET                      = True   # allow GET-based OAuth callback
+SOCIALACCOUNT_LOGIN_ON_GET = True  # allow GET-based OAuth callback
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 10. INTERNATIONALISATION
@@ -443,8 +406,8 @@ CELERY_TASK_SERIALIZER: str = "json"
 CELERY_RESULT_SERIALIZER: str = "json"
 CELERY_TIMEZONE: str = TIME_ZONE
 CELERY_TASK_TRACK_STARTED: bool = True
-CELERY_TASK_TIME_LIMIT: int = 30 * 60        # 30 minutes hard limit
-CELERY_TASK_SOFT_TIME_LIMIT: int = 25 * 60   # 25 minutes soft limit
+CELERY_TASK_TIME_LIMIT: int = 30 * 60  # 30 minutes hard limit
+CELERY_TASK_SOFT_TIME_LIMIT: int = 25 * 60  # 25 minutes soft limit
 
 if _redis_url and _redis_url.startswith("rediss://"):
     _ssl_config = {"ssl_cert_reqs": ssl.CERT_REQUIRED}
@@ -494,7 +457,7 @@ LOGGING = {
 
     "filters": {
         "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
-        "require_debug_true":  {"()": "django.utils.log.RequireDebugTrue"},
+        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
         "skip_static_requests": {
             "()": "django.utils.log.CallbackFilter",
             "callback": lambda record: not record.getMessage().startswith("GET /static/"),
@@ -634,7 +597,7 @@ AXES_FAILURE_LIMIT: int = 4
 AXES_COOLOFF_TIME = timedelta(minutes=15)
 AXES_LOCKOUT_PARAMETERS = ["ip_address", ["username", "user_agent"]]
 AXES_ACCESS_FAILURE_LOG_PER_USER_LIMIT: int = 250
-AXES_LOCKOUT_TEMPLATE = str(BASE_DIR / "website" / "templates" / "axes" / "lockout.html")
+AXES_LOCKOUT_TEMPLATE = str(BASE_DIR / "website/templates/axes/lockout.html")
 AXES_RESET_ON_SUCCESS: bool = True
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -695,7 +658,7 @@ TINYMCE_DEFAULT_CONFIG = {
     "content_style": "body { font-family: Inter, sans-serif; font-size: 14px; }",
     "custom_undo_redo_levels": 10,
 }
-TINYMCE_COMPRESSOR = False
+TINYMCE_COMPRESSOR: bool = False
 
 # django-taggit: case-insensitive tags
 TAGGIT_CASE_INSENSITIVE: bool = True
@@ -720,7 +683,7 @@ SITE_URL: str = os.getenv("SITE_URL")
 SITE_NAME: str = os.getenv("SITE_NAME")
 ADMINS: list[tuple[str, str]] = [(os.getenv("ADMIN_NAME"), os.getenv("ADMIN_EMAIL"))]
 
-PHONENUMBER_DB_FORMAT = "E164"
+PHONENUMBER_DB_FORMAT: str = "E164"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 21. ENVIRONMENT-SPECIFIC OVERRIDES
@@ -746,9 +709,38 @@ if _prod:
         if "dev_console" in _logger_cfg.get("handlers", []):
             _logger_cfg["handlers"].remove("dev_console")
 
-    # Disable Silk profiler in production
-    SILKY_PYTHON_PROFILER = False
+    # Ensure debug is disabled in production
+    DEBUG = False
 
+    if _private_r2 and _public_r2:
+        # ── Full dual-bucket production setup ─────────────────────────────────────
+        STORAGES = {
+            # Private media / resource file uploads  (signed URLs, 1-hour TTL)
+            "default": {
+                "BACKEND": "helpers.cloudflare.storages.MediaFileStorage",
+                "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
+            },
+            # Static files (CSS, JS) served from public CDN bucket
+            "staticfiles": {
+                "BACKEND": "helpers.cloudflare.storages.StaticFileStorage",
+                "OPTIONS": _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS,
+            },
+            # Protected uploads (e.g. admin-only docs) — private bucket, /protected/ prefix
+            "protected": {
+                "BACKEND": "helpers.cloudflare.storages.ProtectedMediaStorage",
+                "OPTIONS": _cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS,
+            },
+            # Publicly readable files (e.g. thumbnails, open resources) — public bucket
+            "public_files": {
+                "BACKEND": "helpers.cloudflare.storages.PublicFilesStorage",
+                "OPTIONS": _cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS,
+            },
+            # Database backups — dedicated isolated bucket
+            "dbbackup": {
+                "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+                "OPTIONS": _BACKUP_R2_OPTIONS,
+            },
+        }
 else:
     # --- Development ---
     if DEBUG:
@@ -756,6 +748,21 @@ else:
 
     # Silk profiler — only in dev
     SILKY_PYTHON_PROFILER = True
+
+    # ── Local filesystem (development default) ────────────────────────────────
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+        "protected": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "dbbackup": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": _BACKUP_R2_OPTIONS,
+        },
+    }
+
+    INSTALLED_APPS: list[str] = DEFAULT_APPS + THIRD_PARTY_APPS + MY_APPS + LOCAL_APPS
+    MIDDLEWARE: list[str] = MIDDLEWARE + LOCAL_MIDDLEWARE
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 22. TEST OVERRIDES
