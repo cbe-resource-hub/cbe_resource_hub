@@ -14,8 +14,11 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.db import models
+from django.utils.html import strip_tags
 from django.utils.text import slugify
 from tinymce.models import HTMLField
+
+from seo.models import SEOModel, SlugRedirectMixin
 
 
 class EducationLevel(models.Model):
@@ -97,7 +100,7 @@ class LearningArea(models.Model):
         super().save(*args, **kwargs)
 
 
-class ResourceItem(models.Model):
+class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
     """
     The core document model — a downloadable educational resource.
 
@@ -152,7 +155,7 @@ class ResourceItem(models.Model):
         default="0.00",
         help_text="Purchase price in KES. Ignored when is_free=True.",
     )
-    resource_type : str = models.CharField(
+    resource_type: str = models.CharField(
         max_length=50,
         blank=True,
         null=True,
@@ -171,15 +174,11 @@ class ResourceItem(models.Model):
         default="other",
         help_text="The type of resource.",
     )
-        
+
     downloads: int = models.PositiveIntegerField(
         default=0,
         help_text="Cumulative download count.",
     )
-
-    # --- Timestamps ---
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Resource Item"
@@ -196,6 +195,10 @@ class ResourceItem(models.Model):
     def save(self, *args, **kwargs) -> None:
         if not self.slug:
             self.slug = slugify(self.title)
+        if self.title and not self.meta_title:
+            self.meta_title = self.title
+        if self.description and not self.meta_description:
+            self.meta_description = strip_tags(self.description)
         super().save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):

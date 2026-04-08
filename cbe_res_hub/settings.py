@@ -7,7 +7,7 @@ Sections:
     3.  Middleware
     4.  Templates
     5.  Database  (Postgres via DATABASE_URL)
-    6.  Cache     (Redis prod | LocMemCache dev)
+    6.  Cache     (Redis)
     7.  Storage   (Cloudflare R2 prod | Local dev)
     8.  Static & Media
     9.  Authentication
@@ -119,6 +119,7 @@ MY_APPS: list[str] = [
     "resources.apps.ResourcesConfig",
     "website.apps.WebsiteConfig",
     "files.apps.FilesConfig",
+    "seo.apps.SeoConfig",
 ]
 
 INSTALLED_APPS: list[str] = DEFAULT_APPS + THIRD_PARTY_APPS + MY_APPS
@@ -139,6 +140,7 @@ MAIN_MIDDLEWARE: list[str] = [
     "axes.middleware.AxesMiddleware",
     "cbe_res_hub.middleware.ForcePasswordChangeMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "seo.middleware.SlugRedirectMiddleware",
 ]
 
 LOCAL_MIDDLEWARE: list[str] = [
@@ -203,41 +205,33 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 6. CACHE  (Redis prod | LocMemCache dev)
+# 6. CACHE  (Redis)
 # ──────────────────────────────────────────────────────────────────────────────
 _redis_url: str = os.getenv("REDIS_URL")
 _redis_password: str = os.getenv("REDIS_PASSWORD")
 
-if _redis_url:
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": f"{_redis_url}/1",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "PASSWORD": _redis_password or None,
-                "IGNORE_EXCEPTIONS": True,
-                "CONNECTION_POOL_KWARGS": {
-                    "retry_on_timeout": True,
-                    "socket_connect_timeout": 30,
-                    "socket_timeout": 300,
-                    "max_connections": 100,
-                },
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{_redis_url}/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": _redis_password or None,
+            "IGNORE_EXCEPTIONS": True,
+            "CONNECTION_POOL_KWARGS": {
+                "retry_on_timeout": True,
+                "socket_connect_timeout": 30,
+                "socket_timeout": 300,
+                "max_connections": 100,
             },
-            "KEY_PREFIX": "cbe",
-            "TIMEOUT": 60 * 60,  # 1 hour
-        }
+        },
+        "KEY_PREFIX": "cbe",
+        "TIMEOUT": 60 * 60,  # 1 hour
     }
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    SESSION_CACHE_ALIAS = "default"
-else:
-    # Zero-config development fallback
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "cbe-resource-hub",
-        }
-    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 7. STORAGE  (Cloudflare R2 — dual-bucket | Local filesystem — dev)
@@ -284,6 +278,7 @@ STATIC_ROOT = BASE_DIR / "static"  # collectstatic target (local / CI)
 
 STATICFILES_DIRS = [
     BASE_DIR / "website/static",  # Bun/Tailwind compiled output
+    "seo/static",
 ]
 
 STATICFILES_FINDERS = (
@@ -765,6 +760,7 @@ else:
     }
 
     INSTALLED_APPS: list[str] = DEFAULT_APPS + THIRD_PARTY_APPS + MY_APPS + LOCAL_APPS
+    MAIN_MIDDLEWARE.insert(0, "cbe_res_hub.middleware.DisableBrowserCacheMiddleware")
     MIDDLEWARE: list[str] = MAIN_MIDDLEWARE + LOCAL_MIDDLEWARE
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -777,18 +773,14 @@ if "pytest" in sys.modules or "test" in sys.argv:
         "BLOCK": False,
         "KEY_FUNCTION": "django_smart_ratelimit.utils.get_ip_key",
     }
-    # Use in-memory cache for tests
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "cbe-test",
-        }
-    }
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
 
     INSTALLED_APPS = DEFAULT_APPS + MY_APPS + THIRD_PARTY_APPS
     MIDDLEWARE = MAIN_MIDDLEWARE
+
+cache_timeout_env_var = os.getenv("CACHE_TIMEOUT")
+CACHE_TIMEOUT: int = int(cache_timeout_env_var) if cache_timeout_env_var else 2419200
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Quick reference

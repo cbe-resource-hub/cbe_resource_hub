@@ -1,4 +1,4 @@
-# 🍽️ Menu System Quick-Start Guide
+# Menu System Quick-Start Guide
 
 The CBE Resource Hub uses a fully database-driven navigation system. You manage menus entirely from the Admin Panel — no code changes needed.
 

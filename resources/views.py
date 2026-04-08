@@ -69,7 +69,6 @@ class ResourceListView(ListView):
             .filter(is_free=True)  # default: show free resources; extend for marketplace
             .order_by("-created_at")
         )
-        print(qs)
 
         # --- Optional filtering via GET params ---
         grade_id = self.request.GET.get("grade")
