@@ -21,7 +21,7 @@ class StaticViewSitemap(Sitemap):
     protocol = "https"
 
     def items(self):
-        return ["home", "contact", "partners"]
+        return ["home", "contact", "partners", "resources:list"]
 
     def location(self, item):
         return reverse(item)
@@ -55,7 +55,7 @@ class ResourceSitemap(Sitemap):
 
     def location(self, obj):
         from django.urls import reverse as r
-        return r("resources:detail", kwargs={"slug": obj.slug})
+        return r("resources:resource_detail", kwargs={"slug": obj.slug})
 
     def lastmod(self, obj):
         return obj.updated_at
