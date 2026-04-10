@@ -1,6 +1,7 @@
 from django.urls import path
 from website import admin_views as views
 from website import admin_dependency_views as dep_views
+from files import views as file_views
 
 app_name = "management"
 
@@ -38,7 +39,12 @@ urlpatterns = [
     path("resources/add/", views.AdminResourceCreateView.as_view(), name="resource_add"),
     path("resources/<int:pk>/edit/", views.AdminResourceUpdateView.as_view(), name="resource_edit"),
     path("resources/<int:pk>/delete/", views.AdminResourceDeleteView.as_view(), name="resource_delete"),
-    # Dependencies (Imported directly in file to avoid bloat)
+
+    # Media Library (Files Management)
+    path("files/", file_views.AdminFileListView.as_view(), name="file_list"),
+    path("files/upload/", file_views.AdminFileUploadView.as_view(), name="file_upload"),
+    path("files/<int:pk>/", file_views.AdminFileUpdateView.as_view(), name="file_edit"),
+    path("files/<int:pk>/delete/", file_views.AdminFileDeleteView.as_view(), name="file_delete"),
 
     # Dependencies (Imported directly in file to avoid bloat)
 
