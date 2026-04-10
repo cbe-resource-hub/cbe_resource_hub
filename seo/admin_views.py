@@ -101,13 +101,20 @@ class AdminSEOAuditView(IsAdminMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        from cms.models import Page
         from resources.models import ResourceItem
 
-        # Only ResourceItem extends SEOModel — Page is a plain model without meta fields
+        # Both Page and ResourceItem now extend SEOModel
+        pages = Page.objects.only(
+            'title', 'slug', 'meta_title', 'meta_description', 'meta_keywords', 'is_published'
+        ).order_by('title')
+
         resources = ResourceItem.objects.select_related('vendor').only(
             'title', 'slug', 'meta_title', 'meta_description', 'meta_keywords', 'vendor'
         ).order_by('title')
 
+        ctx['pages'] = pages
         ctx['resources'] = resources
+        ctx['page_issues'] = sum(1 for p in pages if not p.meta_title or not p.meta_description)
         ctx['resource_issues'] = sum(1 for r in resources if not r.meta_title or not r.meta_description)
         return ctx
