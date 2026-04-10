@@ -670,7 +670,7 @@ DBBACKUP_CONNECTORS = {
 DBBACKUP_FILENAME_TEMPLATE = "{databasename}-{datetime}.{extension}"
 DBBACKUP_DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
 DBBACKUP_DATABASES = ["default"]
-DBBACKUP_STORAGE = "dbbackup"  # uses the STORAGES["dbbackup"] entry above
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 20. MISC / SITE IDENTITY

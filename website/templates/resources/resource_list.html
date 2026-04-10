@@ -17,8 +17,8 @@
   </div>
 
   <!-- ─── Filter bar ──────────────────────────────────────────────── -->
-  <form method="get" action=""
-        hx-get=""
+  <form method="get" action="{% url 'resources:list' %}"
+        hx-get="{% url 'resources:list' %}"
         hx-push-url="true"
         hx-target="#resource-grid"
         hx-swap="innerHTML"

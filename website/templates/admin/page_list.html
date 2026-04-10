@@ -17,7 +17,7 @@
   </div>
 
   <div class="rounded-2xl border border-white/8 overflow-hidden bg-white/5 pb-2">
-    <table class="w-full text-sm" id="dataTable">
+    <table class="w-full text-sm" {% if pages %}id="dataTable"{% endif %}>
       <thead>
         <tr class="border-b border-white/8 bg-white/[0.03]">
           <th class="px-5 py-3 text-left text-xs text-white/40 font-medium uppercase tracking-wider">Title / Slug</th>

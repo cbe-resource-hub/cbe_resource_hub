@@ -17,7 +17,7 @@
   </div>
 
   <div class="rounded-2xl border border-white/8 overflow-hidden bg-white/5 pb-2">
-    <table class="w-full text-sm" id="dataTable">
+    <table class="w-full text-sm" {% if items %}id="dataTable"{% endif %}>
       <thead>
         <tr class="border-b border-white/8 bg-white/[0.03]">
           {% for label, field in columns %}
