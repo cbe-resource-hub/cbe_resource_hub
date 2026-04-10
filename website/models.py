@@ -51,14 +51,33 @@ class Partner(SEOModel, SlugRedirectMixin, models.Model):
     link = models.URLField(null=True, blank=True)
     slug = models.SlugField(max_length=255, null=True, blank=True)
     description = HTMLField(null=True, blank=True)
+    logo = models.ImageField(
+        upload_to='partners/logos/',
+        null=True,
+        blank=True,
+        help_text='Partner logo image (displayed on listings and banners).',
+    )
+    show_as_banner = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text='Show this partner as a banner/ad strip on the public website.',
+    )
+    banner_cta = models.CharField(
+        max_length=80,
+        blank=True,
+        default='Learn More',
+        help_text='Call-to-action button text shown on the banner.',
+    )
 
     def delete(self, using=None, keep_parents=False):
         if self.featured_image:
             self.featured_image.delete(save=False)
+        if self.logo:
+            self.logo.delete(save=False)
         return super().delete(using=using, keep_parents=keep_parents)
 
     def save(self, *args, **kwargs):
-        if not self.slug or self.slug == '':  # or self.name:
+        if not self.slug or self.slug == '':
             self.slug = slugify(self.name)
         if self.name and not self.meta_title:
             self.meta_title = self.name

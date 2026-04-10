@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, ListView, UpdateView, CreateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -7,7 +7,7 @@ from django.contrib import messages
 from accounts.models import CustomUser
 from cms.models import Page, Menu, SiteSetting
 from resources.models import ResourceItem
-from website.models import ContactMessage
+from website.models import ContactMessage, Partner
 
 class IsAdminMixin(UserPassesTestMixin):
     def test_func(self):
@@ -128,14 +128,16 @@ class AdminPageListView(IsAdminMixin, ListView):
 
 class AdminPageCreateView(IsAdminMixin, CreateView):
     model = Page
-    template_name = "admin/generic_form.html"
-    fields = "__all__"
+    template_name = "admin/seo_form.html"
+    fields = ["title", "slug", "content", "is_published",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:page_list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = "Create New Page"
         ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Pages"
         return ctx
 
     def form_valid(self, form):
@@ -144,14 +146,16 @@ class AdminPageCreateView(IsAdminMixin, CreateView):
 
 class AdminPageUpdateView(IsAdminMixin, UpdateView):
     model = Page
-    template_name = "admin/generic_form.html"
-    fields = "__all__"
+    template_name = "admin/seo_form.html"
+    fields = ["title", "slug", "content", "is_published",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:page_list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = f"Edit Page: {self.object.title}"
         ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Pages"
         return ctx
 
     def form_valid(self, form):
@@ -274,14 +278,16 @@ class AdminResourceListView(IsAdminMixin, ListView):
 
 class AdminResourceCreateView(IsAdminMixin, CreateView):
     model = ResourceItem
-    template_name = "admin/generic_form.html"
-    fields = ["title", "slug", "resource_type", "description", "grade", "learning_area", "file", "is_free", "price", "vendor"]
+    template_name = "admin/seo_form.html"
+    fields = ["title", "slug", "resource_type", "description", "grade", "learning_area", "file", "is_free", "price", "vendor",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:resource_list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = "Create New Resource"
         ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Resources"
         return ctx
 
     def form_valid(self, form):
@@ -290,14 +296,16 @@ class AdminResourceCreateView(IsAdminMixin, CreateView):
 
 class AdminResourceUpdateView(IsAdminMixin, UpdateView):
     model = ResourceItem
-    template_name = "admin/generic_form.html"
-    fields = ["title", "slug", "resource_type", "description", "grade", "learning_area", "file", "is_free", "price", "vendor"]
+    template_name = "admin/seo_form.html"
+    fields = ["title", "slug", "resource_type", "description", "grade", "learning_area", "file", "is_free", "price", "vendor",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:resource_list")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["title"] = f"Edit Resource: {self.object.title}"
         ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Resources"
         return ctx
 
     def form_valid(self, form):
@@ -349,4 +357,60 @@ class AdminContactMessageDeleteView(IsAdminMixin, DeleteView):
 
     def form_valid(self, form):
         messages.success(self.request, "Contact message deleted.")
+        return super().form_valid(form)
+
+
+# ── Partners ─────────────────────────────────────────────────────────────────
+class AdminPartnerListView(IsAdminMixin, ListView):
+    model = Partner
+    template_name = "admin/partner_list.html"
+    context_object_name = "partners"
+    paginate_by = 30
+    ordering = ["name"]
+
+
+class AdminPartnerCreateView(IsAdminMixin, CreateView):
+    model = Partner
+    template_name = "admin/seo_form.html"
+    fields = ["name", "slug", "link", "description", "logo", "show_as_banner", "banner_cta",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
+    success_url = reverse_lazy("management:partner_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = "Add New Partner"
+        ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Partners"
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Partner '{form.instance.name}' added successfully.")
+        return super().form_valid(form)
+
+
+class AdminPartnerUpdateView(IsAdminMixin, UpdateView):
+    model = Partner
+    template_name = "admin/seo_form.html"
+    fields = ["name", "slug", "link", "description", "logo", "show_as_banner", "banner_cta",
+              "meta_title", "meta_description", "meta_keywords", "featured_image"]
+    success_url = reverse_lazy("management:partner_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["title"] = f"Edit Partner: {self.object.name}"
+        ctx["cancel_url"] = self.success_url
+        ctx["parent_title"] = "Partners"
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(self.request, "Partner updated successfully.")
+        return super().form_valid(form)
+
+
+class AdminPartnerDeleteView(IsAdminMixin, DeleteView):
+    model = Partner
+    success_url = reverse_lazy("management:partner_list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Partner deleted.")
         return super().form_valid(form)

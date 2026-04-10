@@ -173,6 +173,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 # Injects site_settings + menus into every template
                 "cms.context_processors.global_settings",
+                # Injects partner_banners (show_as_banner=True) into every template
+                "website.context_processors.partner_banners",
             ],
         },
     },

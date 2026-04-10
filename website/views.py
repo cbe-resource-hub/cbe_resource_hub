@@ -14,6 +14,7 @@ from django.views.generic import FormView, TemplateView
 
 from resources.models import EducationLevel, LearningArea, ResourceItem
 from website.forms import ContactForm
+from website.models import Partner
 
 
 class HomePageView(TemplateView):
@@ -101,3 +102,13 @@ class ContactView(FormView):
         ]
         return ctx
 
+
+
+class PartnerListView(TemplateView):
+    """Public page listing all partners."""
+    template_name = "website/partners.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        ctx["partners"] = Partner.objects.all().order_by("name")
+        return ctx

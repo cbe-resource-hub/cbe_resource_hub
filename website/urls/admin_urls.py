@@ -85,4 +85,10 @@ urlpatterns = [
     path("seo/<int:pk>/edit/", seo_views.AdminSlugRedirectUpdateView.as_view(), name="seo_redirect_edit"),
     path("seo/<int:pk>/delete/", seo_views.AdminSlugRedirectDeleteView.as_view(), name="seo_redirect_delete"),
     path("seo/audit/", seo_views.AdminSEOAuditView.as_view(), name="seo_audit"),
+
+    # Partners
+    path("partners/", views.AdminPartnerListView.as_view(), name="partner_list"),
+    path("partners/add/", views.AdminPartnerCreateView.as_view(), name="partner_add"),
+    path("partners/<int:pk>/edit/", views.AdminPartnerUpdateView.as_view(), name="partner_edit"),
+    path("partners/<int:pk>/delete/", views.AdminPartnerDeleteView.as_view(), name="partner_delete"),
 ]
