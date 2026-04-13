@@ -28,8 +28,10 @@
 - **Dynamic Menus** — CMS-driven header & footer navigation, zero code changes needed
 - **Contact Page** — Full form with email delivery, honeypot anti-spam, and animated responsive UI
 - **Enhanced Homepage** — Live HTMX search bar with debounced suggestions dropdown, resource type card grid, compact level pills, tabbed recent/popular sections, animated intersection stats counter, and scroll-to-top FAB
+- **SEO Optimization** — Pre-configured Open Graph (OG), Twitter Cards, JSON-LD structured data, and dynamic meta descriptions across all public pages
 - **SEO Landing Pages** — Per resource-type detail pages (`/resources/type/<type>/`) with JSON-LD `CollectionPage` schema, breadcrumbs, pagination, and sidebar navigation
 - **Sitemap & robots.txt** — Auto-generated `sitemap.xml` and configurable `robots.txt` for Search Console
+- **Custom Branding** — Fully integrated SVG logo support for high-DPI scaling across the platform and favicons
 
 ---
 
@@ -312,6 +314,9 @@ Set up R2 in the Cloudflare dashboard:
 ```bash
 # Seed Kenyan CBC curriculum (idempotent)
 uv run python manage.py prepopulate_cbe
+
+# Seed default navigation menus (Header & Footer)
+uv run python manage.py populate_menus
 
 # Standard Django commands
 uv run python manage.py makemigrations
