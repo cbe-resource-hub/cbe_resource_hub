@@ -73,7 +73,7 @@ cbe_resource_hub/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourorg/cbe_resource_hub.git
+git clone https://github.com/paulmbui20/cbe_resource_hub.git
 cd cbe_resource_hub
 ```
 
@@ -180,20 +180,20 @@ Visit: http://localhost:8000
 
 ## 🔑 Key URLs
 
-| URL | Description |
-|-----|-------------|
-| `/` | Public homepage — live search, resource type cards, stats, partners |
-| `/resources/` | Searchable & filterable resource catalogue |
-| `/resources/type/<type>/` | SEO-optimised resource type landing page |
-| `/contact/` | Contact form |
-| `/management/` | Custom admin panel (Admin/Superuser only) |
-| `/accounts/login/` | Email login page |
-| `/accounts/signup/` | Registration |
-| `/accounts/social/login/google/` | Google OAuth entry |
-| `/account/password/change/` | Password change (forced on first admin-created login) |
-| `/pages/<slug>/` | CMS static pages |
-| `/sitemap.xml` | Auto-generated sitemap |
-| `/robots.txt` | Search engine crawl directives |
+| URL                              | Description                                                         |
+| -------------------------------- | ------------------------------------------------------------------- |
+| `/`                              | Public homepage — live search, resource type cards, stats, partners |
+| `/resources/`                    | Searchable & filterable resource catalogue                          |
+| `/resources/type/<type>/`        | SEO-optimised resource type landing page                            |
+| `/contact/`                      | Contact form                                                        |
+| `/management/`                   | Custom admin panel (Admin/Superuser only)                           |
+| `/accounts/login/`               | Email login page                                                    |
+| `/accounts/signup/`              | Registration                                                        |
+| `/accounts/social/login/google/` | Google OAuth entry                                                  |
+| `/account/password/change/`      | Password change (forced on first admin-created login)               |
+| `/pages/<slug>/`                 | CMS static pages                                                    |
+| `/sitemap.xml`                   | Auto-generated sitemap                                              |
+| `/robots.txt`                    | Search engine crawl directives                                      |
 
 ---
 
@@ -205,10 +205,10 @@ Navigation menus are **100% database-driven** — no code changes needed.
 
 1. **Admin Panel → Menus → + Add Menu** — use one of the reserved slot names:
 
-   | Menu Name | Where it renders |
-   |-----------|-----------------|
+   | Menu Name        | Where it renders                   |
+   | ---------------- | ---------------------------------- |
    | `primary_header` | Desktop & mobile header navigation |
-   | `footer` | Footer quick-links column |
+   | `footer`         | Footer quick-links column          |
 
 2. **Admin Panel → Menu Items → + Add Menu Item** — fill in Title, URL, and Order
 
@@ -239,12 +239,12 @@ Toasts auto-dismiss after 5 seconds with an animated progress bar. Users can als
 
 ## 👤 User Roles
 
-| Role | Permissions |
-|------|------------|
-| **Standard User** | Browse & download resources, manage favourites |
-| **Vendor/Creator** | All of the above + upload and manage own resources |
-| **Admin** | Full management panel access: CRUD for users, pages, resources, menus, settings, curriculum |
-| **Superuser** | All Admin permissions + Django internals access |
+| Role               | Permissions                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| **Standard User**  | Browse & download resources, manage favourites                                              |
+| **Vendor/Creator** | All of the above + upload and manage own resources                                          |
+| **Admin**          | Full management panel access: CRUD for users, pages, resources, menus, settings, curriculum |
+| **Superuser**      | All Admin permissions + Django internals access                                             |
 
 > **Security Note:** Users cannot self-promote to Admin. Only superusers or existing Admins can assign the Admin role via the management panel.
 
@@ -297,13 +297,13 @@ Set up R2 in the Cloudflare dashboard:
 
 ## 🎨 Frontend Stack
 
-| Technology | Purpose |
-|-----------|---------|
-| **Tailwind CSS v4** | Utility-first styling |
-| **Alpine.js** | Reactive UI (modals, bulk actions, dropdowns) |
-| **HTMX** | Server-driven interactivity (favourites, partial updates) |
-| **TinyMCE** (local) | Rich text editor, served from static files — no CDN |
-| **simple-datatables** (local) | Client-side sort/search/paginate — no CDN |
+| Technology                    | Purpose                                                   |
+| ----------------------------- | --------------------------------------------------------- |
+| **Tailwind CSS v4**           | Utility-first styling                                     |
+| **Alpine.js**                 | Reactive UI (modals, bulk actions, dropdowns)             |
+| **HTMX**                      | Server-driven interactivity (favourites, partial updates) |
+| **TinyMCE** (local)           | Rich text editor, served from static files — no CDN       |
+| **simple-datatables** (local) | Client-side sort/search/paginate — no CDN                 |
 
 ---
 

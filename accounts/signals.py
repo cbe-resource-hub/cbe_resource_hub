@@ -18,10 +18,12 @@ from __future__ import annotations
 
 import logging
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from allauth.account.signals import password_changed
+
+from accounts.adapters import _unique_username, _slugify_username
 
 logger = logging.getLogger(__name__)
 
@@ -100,4 +102,9 @@ def reset_must_change_password(sender, request, user, **kwargs):
     if getattr(user, "must_change_password", False):
         user.must_change_password = False
         user.save(update_fields=["must_change_password"])
-        
+
+
+@receiver(pre_save, sender="accounts.CustomUser")
+def generate_username_from_email(sender, instance, **kwargs):
+    if instance.email and ( not instance.username or instance.username == "" ):
+        instance.username = _unique_username(_slugify_username(instance.email))

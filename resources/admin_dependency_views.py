@@ -4,6 +4,7 @@ from django.contrib import messages
 from website.admin_views import IsAdminMixin
 from resources.models import EducationLevel, Grade, LearningArea
 from cms.models import MenuItem
+from cms.forms import MenuItemForm
 
 # ── Education Levels ────────────────────────────────────────────────────────
 class AdminEducationLevelListView(IsAdminMixin, ListView):
@@ -131,44 +132,3 @@ class AdminLearningAreaDeleteView(IsAdminMixin, DeleteView):
         messages.success(self.request, "Deleted Learning Area.")
         return super().form_valid(form)
 
-# ── Menu Items ──────────────────────────────────────────────────────────────
-class AdminMenuItemListView(IsAdminMixin, ListView):
-    model = MenuItem
-    template_name = "admin/basic_list.html"
-    context_object_name = "items"
-    extra_context = {
-        "title": "Menu Items",
-        "add_url": "management:menuitem_add",
-        "edit_url": "management:menuitem_edit",
-        "delete_url": "management:menuitem_delete",
-        "columns": [("Title", "title"), ("Menu", "menu"), ("URL", "url"), ("Order", "order")]
-    }
-
-class AdminMenuItemCreateView(IsAdminMixin, CreateView):
-    model = MenuItem
-    template_name = "admin/generic_form.html"
-    fields = "__all__"
-    success_url = reverse_lazy("management:menuitem_list")
-    extra_context = {"title": "Add Menu Item"}
-
-    def form_valid(self, form):
-        messages.success(self.request, "Menu Item created.")
-        return super().form_valid(form)
-
-class AdminMenuItemUpdateView(IsAdminMixin, UpdateView):
-    model = MenuItem
-    template_name = "admin/generic_form.html"
-    fields = "__all__"
-    success_url = reverse_lazy("management:menuitem_list")
-    extra_context = {"title": "Edit Menu Item"}
-
-    def form_valid(self, form):
-        messages.success(self.request, "Menu Item updated.")
-        return super().form_valid(form)
-
-class AdminMenuItemDeleteView(IsAdminMixin, DeleteView):
-    model = MenuItem
-    success_url = reverse_lazy("management:menuitem_list")
-    def form_valid(self, form):
-        messages.success(self.request, "Deleted Menu Item.")
-        return super().form_valid(form)

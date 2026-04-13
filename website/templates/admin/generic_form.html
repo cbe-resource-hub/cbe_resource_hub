@@ -22,7 +22,7 @@
 
       {{ form.media }}
 
-      <form method="post" enctype="multipart/form-data" novalidate id="adminForm">
+      <form method="post" enctype="multipart/form-data" novalidate id="adminForm" x-data="{ settingKey: '{{ form.instance.key|default:'' }}' }">
         {% csrf_token %}
         
         {% if form.non_field_errors %}
@@ -47,15 +47,48 @@
             {% if field.help_text %}
             <p class="mt-1 text-xs text-white/40">{{ field.help_text }}</p>
             {% endif %}
-          {% elif field.field.widget.input_type == 'textarea' %}
-              <div class="relative overflow-x-auto">
-                  {% render_field field class="responsive" %}
+          {% elif field.field.widget.template_name == 'django/forms/widgets/textarea.html' %}
+              <div class="relative overflow-x-auto w-full">
+                  {% render_field field class="w-full rounded-lg bg-[#0d1117] border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary" %}
+                  {% if field.name == 'value' %}
+                  <select x-show="settingKey === 'site_indexing'" x-cloak
+                          @change="$refs.realValueInput.value = $event.target.value"
+                          class="w-full rounded-lg bg-[#0d1117] border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary appearance-none">
+                      <option value="" disabled :selected="!$refs.realValueInput?.value">Select status...</option>
+                      <option value="true" :selected="$refs.realValueInput?.value === 'true'">true (Allow search engines)</option>
+                      <option value="false" :selected="$refs.realValueInput?.value === 'false'">false (Block search engines)</option>
+                  </select>
+                  <p x-show="settingKey === 'site_indexing'" x-cloak class="mt-1 text-xs text-white/40">Modifies the meta robots tag and robots.txt globally.</p>
+                  {% endif %}
               {% if field.help_text %}
-            <p class="mt-1 text-xs text-white/40">{{ field.help_text }}</p>
+            <p class="mt-1 text-xs text-white/40" x-show="settingKey !== 'site_indexing'">{{ field.help_text }}</p>
             {% endif %}
               </div>
           {% else %}
-            {% render_field field class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary" %}
+            {% if field.field.widget.attrs.list and datalists %}
+              <div x-data="{ mode: 'select', init() { if (this.$refs.input.value && !Array.from(this.$refs.select.options).some(o => o.value === this.$refs.input.value && o.value !== '__custom__')) this.mode = 'custom' } }">
+                {% for list_id, options in datalists.items %}
+                  {% if list_id == field.field.widget.attrs.list %}
+                    <select x-ref="select" x-show="mode === 'select'"
+                            @change="if($event.target.value === '__custom__') { mode = 'custom'; $nextTick(() => { $refs.input.focus(); $refs.input.value = ''; $refs.input.dispatchEvent(new Event('input')) }); } else { $refs.input.value = $event.target.value; $refs.input.dispatchEvent(new Event('input')) }"
+                            class="w-full rounded-lg bg-[#0d1117] border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary appearance-none">
+                      <option value="" disabled :selected="!$refs.input?.value">-- Select an option --</option>
+                      {% for opt in options %}
+                        <option value="{{ opt.value }}" :selected="$refs.input?.value === '{{ opt.value }}'">{{ opt.value }} - {{ opt.label }}</option>
+                      {% endfor %}
+                      <option value="__custom__">+ Enter custom value...</option>
+                    </select>
+                  {% endif %}
+                {% endfor %}
+                <div x-show="mode === 'custom'" class="flex items-center gap-2" x-cloak>
+                    {% render_field field x-ref="input" class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary" %}
+                    <button type="button" @click="mode = 'select'; $refs.input.value = ''; $refs.select.value = ''; $refs.input.dispatchEvent(new Event('input'))" class="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors whitespace-nowrap">Cancel</button>
+                </div>
+              </div>
+            {% else %}
+              {% render_field field class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary" %}
+            {% endif %}
+            
             {% if field.help_text %}
             <p class="mt-1 text-xs text-white/40">{{ field.help_text }}</p>
             {% endif %}
@@ -77,6 +110,16 @@
             Cancel
           </a>
         </div>
+        {% if datalists %}
+          {% for list_id, options in datalists.items %}
+          <datalist id="{{ list_id }}">
+            {% for opt in options %}
+            <option value="{{ opt.value }}">{{ opt.label }}</option>
+            {% endfor %}
+          </datalist>
+          {% endfor %}
+        {% endif %}
+
       </form>
     </div>
   </div>

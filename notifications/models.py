@@ -14,6 +14,7 @@ class Notification(models.Model):
         RESOURCE_UPLOAD = 'RESOURCE_UPLOAD', _('Resource Upload')
         SECURITY_ALERT = 'SECURITY_ALERT', _('Security Alert (Lockout)')
         GENERAL = 'GENERAL', _('General')
+        GENERIC_MESSAGE = 'GENERIC_MESSAGE', _('Generic Message')
 
     class Status(models.TextChoices):
         PENDING = 'PENDING', _('Pending')

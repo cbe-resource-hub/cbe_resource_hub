@@ -199,6 +199,8 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
             self.meta_title = self.title
         if self.description and not self.meta_description:
             self.meta_description = strip_tags(self.description)
+        if self.is_free:
+            self.price = 0.00
         super().save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False):

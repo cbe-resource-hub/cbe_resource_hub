@@ -1,3 +1,7 @@
+{% if site_settings.site_indexing == 'false' %}
+User-agent: *
+Disallow: /
+{% else %}
 User-agent: *
 Allow: /
 Disallow: /admin/
@@ -17,3 +21,4 @@ Allow: /contact/
 
 # Sitemap location
 Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
+{% endif %}

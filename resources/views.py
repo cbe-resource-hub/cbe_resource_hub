@@ -14,12 +14,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.contrib import messages
+
+from .admin_views import VendorRequiredMixin
 from .forms import ResourceItemForm
 
 from .models import EducationLevel, LearningArea, ResourceItem
@@ -102,17 +105,17 @@ class ResourceListView(ListView):
         context["current_level"] = self.request.GET.get("level", "")
         context["search_query"] = self.request.GET.get("q", "")
         context["current_resource_type"] = self.request.GET.get("resource_type", "")
-        
+
         # Pre-fetch user favorites to avoid N+1 queries in the template
         if self.request.user.is_authenticated:
             context["user_favorite_ids"] = set(self.request.user.favorites.values_list("id", flat=True))
         else:
             context["user_favorite_ids"] = set()
-            
+
         return context
 
     def render_to_response(
-        self, context: dict[str, Any], **response_kwargs: Any
+            self, context: dict[str, Any], **response_kwargs: Any
     ) -> HttpResponse:
         """
         Return a partial HTML snippet for HTMX requests; full page otherwise.
@@ -150,8 +153,27 @@ class ResourceDetailView(DetailView):
 
     def get_object(self, queryset: QuerySet[ResourceItem] | None = None) -> ResourceItem:
         obj: ResourceItem = super().get_object(queryset)
-        obj.increment_downloads()
         return obj
+
+
+@require_POST
+def increment_downloads(request, slug):
+    try:
+        resource_item = ResourceItem.objects.get(slug=slug)
+        resource_item_initial_downloads = resource_item.downloads
+        resource_item.increment_downloads()
+        resource_item_final_downloads = resource_item.downloads
+        message = f"Download incremented from {resource_item_initial_downloads} to {resource_item_final_downloads}"
+        print(message)
+        return JsonResponse(
+            {
+                "success": message
+            },
+            status=200
+        )
+
+    except ResourceItem.DoesNotExist:
+        return JsonResponse({"error": "Resource item not found"}, status=404)
 
 
 class ToggleFavoriteView(LoginRequiredMixin, DetailView):
@@ -164,7 +186,7 @@ class ToggleFavoriteView(LoginRequiredMixin, DetailView):
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         resource = self.get_object()
         user = request.user
-        
+
         # Toggle logic
         if resource in user.favorites.all():
             user.favorites.remove(resource)
@@ -172,7 +194,7 @@ class ToggleFavoriteView(LoginRequiredMixin, DetailView):
         else:
             user.favorites.add(resource)
             is_favorited = True
-            
+
         # If it's an HTMX request, we return just the button snippet.
         if request.headers.get("HX-Request"):
             html = render_to_string(
@@ -181,16 +203,73 @@ class ToggleFavoriteView(LoginRequiredMixin, DetailView):
                 request=request
             )
             return HttpResponse(html)
-            
+
         # Fallback for non-HTMX
         from django.shortcuts import redirect
         return redirect(resource.get_absolute_url())
 
 
-class VendorRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.is_content_vendor
+# ── Resource Type Detail (SEO landing page per type) ──────────────────────────
+# Map resource_type key → (icon emoji, short description for the landing page)
+RESOURCE_TYPE_INFO: dict[str, dict] = {
+    "lesson_plan": {"icon": "📋", "label": "Lesson Plans",
+                    "desc": "Day-by-day structured teaching blueprints for effective classroom delivery."},
+    "schemes_of_work": {"icon": "📅", "label": "Schemes of Work",
+                        "desc": "Term-long curriculum plans helping teachers cover the full syllabus on time."},
+    "curriculum_design": {"icon": "🗺️", "label": "Curriculum Design",
+                          "desc": "Comprehensive curriculum frameworks and competency-based programme designs."},
+    "record_of_work": {"icon": "📒", "label": "Records of Work",
+                       "desc": "Official records documenting what has been taught in each class and term."},
+    "teachers_guide": {"icon": "📖", "label": "Teachers' Guides",
+                       "desc": "Step-by-step instructional manuals to help educators deliver quality lessons."},
+    "textbook": {"icon": "📚", "label": "Textbooks",
+                 "desc": "Approved learner study books aligned to the latest CBC/CBE curriculum."},
+    "notes": {"icon": "📝", "label": "Notes",
+              "desc": "Concise revision notes and summaries covering key topics in every subject."},
+    "exam": {"icon": "✏️", "label": "Exams & Past Papers",
+             "desc": "Past examination papers and mock exams to help learners prepare and practice."},
+    "report_card": {"icon": "🗒️", "label": "Report Cards",
+                    "desc": "Official learner assessment and progress report card templates."},
+    "other": {"icon": "📂", "label": "Other Resources",
+              "desc": "Additional CBC-aligned resources that don't fit a specific category above."},
+}
 
+
+class ResourceTypeDetailView(ListView):
+    """
+    SEO-optimized landing page for a specific resource type.
+
+    URL: /resources/type/<resource_type>/
+    """
+
+    model = ResourceItem
+    template_name = "resources/resource_type_detail.html"
+    context_object_name = "resources"
+    paginate_by = 12
+
+    def get_queryset(self) -> QuerySet[ResourceItem]:
+        self.resource_type = self.kwargs["resource_type"]
+        return (
+            ResourceItem.objects.select_related("grade", "grade__level", "learning_area")
+            .filter(resource_type=self.resource_type, is_free=True)
+            .order_by("-created_at")
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        ctx = super().get_context_data(**kwargs)
+        info = RESOURCE_TYPE_INFO.get(self.resource_type,
+                                      {"icon": "📂", "label": self.resource_type.replace("_", " ").title(), "desc": ""})
+        ctx["resource_type_key"] = self.resource_type
+        ctx["resource_type_label"] = info["label"]
+        ctx["resource_type_icon"] = info["icon"]
+        ctx["resource_type_desc"] = info["desc"]
+        ctx["resource_type_count"] = self.get_queryset().count()
+        # For related types sidebar / cross-links
+        ctx["all_resource_types"] = RESOURCE_TYPE_INFO
+        return ctx
+
+
+# user/vendor resource crud views
 
 class ResourceCreateView(VendorRequiredMixin, CreateView):
     model = ResourceItem
@@ -236,56 +315,7 @@ class ResourceDeleteView(VendorRequiredMixin, DeleteView):
         if self.request.user.is_superuser or self.request.user.role == 'admin':
             return qs
         return qs.filter(vendor=self.request.user)
-        
+
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Resource deleted successfully.")
         return super().delete(request, *args, **kwargs)
-
-
-# ── Resource Type Detail (SEO landing page per type) ──────────────────────────
-# Map resource_type key → (icon emoji, short description for the landing page)
-RESOURCE_TYPE_INFO: dict[str, dict] = {
-    "lesson_plan":        {"icon": "📋", "label": "Lesson Plans",       "desc": "Day-by-day structured teaching blueprints for effective classroom delivery."},
-    "schemes_of_work":    {"icon": "📅", "label": "Schemes of Work",     "desc": "Term-long curriculum plans helping teachers cover the full syllabus on time."},
-    "curriculum_design":  {"icon": "🗺️", "label": "Curriculum Design",   "desc": "Comprehensive curriculum frameworks and competency-based programme designs."},
-    "record_of_work":     {"icon": "📒", "label": "Records of Work",      "desc": "Official records documenting what has been taught in each class and term."},
-    "teachers_guide":     {"icon": "📖", "label": "Teachers' Guides",    "desc": "Step-by-step instructional manuals to help educators deliver quality lessons."},
-    "textbook":           {"icon": "📚", "label": "Textbooks",            "desc": "Approved learner study books aligned to the latest CBC/CBE curriculum."},
-    "notes":              {"icon": "📝", "label": "Notes",                "desc": "Concise revision notes and summaries covering key topics in every subject."},
-    "exam":               {"icon": "✏️", "label": "Exams & Past Papers",  "desc": "Past examination papers and mock exams to help learners prepare and practice."},
-    "report_card":        {"icon": "🗒️", "label": "Report Cards",         "desc": "Official learner assessment and progress report card templates."},
-    "other":              {"icon": "📂", "label": "Other Resources",      "desc": "Additional CBC-aligned resources that don't fit a specific category above."},
-}
-
-
-class ResourceTypeDetailView(ListView):
-    """
-    SEO-optimised landing page for a specific resource type.
-
-    URL: /resources/type/<resource_type>/
-    """
-
-    model = ResourceItem
-    template_name = "resources/resource_type_detail.html"
-    context_object_name = "resources"
-    paginate_by = 12
-
-    def get_queryset(self) -> QuerySet[ResourceItem]:
-        self.resource_type = self.kwargs["resource_type"]
-        return (
-            ResourceItem.objects.select_related("grade", "grade__level", "learning_area")
-            .filter(resource_type=self.resource_type, is_free=True)
-            .order_by("-created_at")
-        )
-
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        ctx = super().get_context_data(**kwargs)
-        info = RESOURCE_TYPE_INFO.get(self.resource_type, {"icon": "📂", "label": self.resource_type.replace("_", " ").title(), "desc": ""})
-        ctx["resource_type_key"] = self.resource_type
-        ctx["resource_type_label"] = info["label"]
-        ctx["resource_type_icon"] = info["icon"]
-        ctx["resource_type_desc"] = info["desc"]
-        ctx["resource_type_count"] = self.get_queryset().count()
-        # For related types sidebar / cross-links
-        ctx["all_resource_types"] = RESOURCE_TYPE_INFO
-        return ctx
