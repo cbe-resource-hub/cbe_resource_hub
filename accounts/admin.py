@@ -17,14 +17,14 @@ class CustomUserAdmin(UserAdmin):
     key fieldsets and list_display to make email the focal point.
     """
 
-    list_display   = ("email", "username", "role", "is_vendor", "is_staff", "date_joined")
-    list_filter    = ("role", "is_vendor", "is_staff", "is_active")
+    list_display   = ("email", "username", "role", "is_vendor", "is_staff", "must_change_password" ,"date_joined", "last_login",)
+    list_filter    = ("role", "is_vendor", "is_staff", "is_active", "must_change_password")
     search_fields  = ("email", "username", "first_name", "last_name", "phone_number")
     ordering       = ("-date_joined",)
 
     # Redefine fieldsets so email comes first and username is clearly secondary
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (None, {"fields": ("email", "password", "must_change_password")}),
         (_("Personal info"), {"fields": ("username", "first_name", "last_name", "phone_number")}),
         (_("Permissions"), {
             "fields": (
