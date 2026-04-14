@@ -189,6 +189,8 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
         indexes = [
             models.Index(fields=["grade", "learning_area"]),
             models.Index(fields=["is_free", "-created_at"]),
+            models.Index(fields=['-updated_at']),
+            models.Index(fields=['-resource_type']),
         ]
 
     def __str__(self) -> str:

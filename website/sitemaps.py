@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
+from django.db.models import QuerySet
 from django.urls import reverse
 
 from cms.models import Page
@@ -67,13 +68,36 @@ class ResourceTypeSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return ResourceItem.objects.all().only("resource_type", "updated_at").order_by("-updated_at")
+        RESOURCE_TYPES = [
+            (key, label)
+            for key, label in ResourceItem._meta.get_field("resource_type").choices
+        ]
+        keys: list[str] = []
+        for key, label in RESOURCE_TYPES:
+            keys.append(f"{key}")
+
+        return keys
 
     def location(self, obj):
-        return reverse("resources:type_detail", kwargs={"resource_type": obj.resource_type})
+        return reverse("resources:type_detail", kwargs={"resource_type": obj})
+
+    qs: QuerySet[ResourceItem] = (
+        ResourceItem.objects.only(
+            "resource_type",
+            "updated_at",
+            "id"
+        )
+        .order_by("-updated_at")
+    )
 
     def lastmod(self, obj):
-        return obj.updated_at
+
+        try:
+            resources_updated_at = self.qs.filter(resource_type=obj).last()
+            if resources_updated_at:
+                return resources_updated_at.updated_at
+        except ResourceItem.DoesNotExist:
+            pass
 
 
 class PartnerSitemap(Sitemap):

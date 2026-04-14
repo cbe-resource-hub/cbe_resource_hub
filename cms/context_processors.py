@@ -60,6 +60,7 @@ def global_settings(request: "HttpRequest") -> dict[str, Any]:
             Menu.objects.prefetch_related(
                 "items",
                 "items__children",
+                "items__parent",
             )
         )
         # Build a slug-keyed dict so templates can do {{ menus.primary_header }}

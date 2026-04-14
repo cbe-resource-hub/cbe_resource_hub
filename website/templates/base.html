@@ -212,7 +212,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
 
-            <!-- Wordmark -->
+            <!-- Logo -->
             <a href="/" class="flex items-center gap-2.5 group shrink-0">
                 <img src="{% static 'images/logo.svg' %}" alt="Logo" class="w-8 h-8 transition-transform group-hover:scale-105" />
                 <span class="font-bold text-lg tracking-tight text-white group-hover:text-brand-primary transition-colors">
@@ -229,6 +229,7 @@
                             {% if not item.parent %}
                                 <div class="relative" x-data="{ open: false }">
                                     {% if item.children.exists %}
+                                        <section @mouseover="open = !open" @mouseout="open = false">
                                         <button @click="open = !open" @keydown.escape="open = false"
                                                 class="text-sm text-white/70 hover:text-white transition-colors flex items-center gap-1">
                                             {{ item.title }}
@@ -246,6 +247,8 @@
                                                    class="block px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition-colors">{{ child.title }}</a>
                                             {% endfor %}
                                         </div>
+                                        </section>
+
                                     {% else %}
                                         <a href="{{ item.url }}"
                                            class="text-sm text-white/70 hover:text-white transition-colors">{{ item.title }}</a>
@@ -263,6 +266,7 @@
                 {% if user.is_authenticated %}
                     <!-- User avatar dropdown -->
                     <div class="relative" x-data="{ open: false }">
+                    <section @mouseover="open = !open" @mouseout="open = false">
                         <button @click="open = !open" @keydown.escape="open = false"
                                 class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
 
@@ -322,6 +326,7 @@
                                 </a>
                             </div>
                         </div>
+                    </section>
                     </div>
                 {% else %}
                     <a href="{% url 'account_login' %}"
