@@ -1,6 +1,6 @@
 """resources/urls.py"""
 from django.contrib.sitemaps.views import sitemap
-from django.urls import path
+from django.urls import path, re_path
 
 from website.sitemaps import ResourceSitemap, ResourceTypeSitemap
 from . import views
@@ -20,7 +20,7 @@ urlpatterns = [
     path("", views.ResourceListView.as_view(), name="list"),
 
     path("type/sitemap.xml", sitemap, {'sitemaps': resources_types_sitemaps}, name="type_sitemaps"),
-    path("type/<str:resource_type>/", views.ResourceTypeDetailView.as_view(), name="type_detail"),
+    re_path(r'^type(?:/(?P<resource_type>[-\w]+))?/$', views.ResourceTypeDetailView.as_view(), name="type_detail"),
 
     path("<slug:slug>/favorite/", views.ToggleFavoriteView.as_view(), name="toggle_favorite"),
 

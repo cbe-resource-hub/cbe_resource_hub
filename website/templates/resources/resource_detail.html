@@ -53,21 +53,33 @@
 
         <div class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
             <!-- Top accent bar -->
-            <div class="h-1.5 bg-linear-to-r from-brand-primary to-brand-accent"></div>
+            <div class="h-1.5 bg-linear-to-r from-brand-gold/50 to-brand-gold/75"></div>
 
             <div class="p-8">
                 <div>
                     <!-- Badges -->
                     <div class="flex flex-wrap gap-2 mb-4">
-                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-brand-primary/20 text-brand-accent">
+
+                    {% if resource.is_free %}
+                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Free</span>
+                    {% endif %}
+                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white/10 text-white/70">
+                      <a href="{% url 'resources:list' %}?level={{ resource.grade.level.pk }}" class="underline"
+                            title="View more {{ resource.grade.level.name|lower  }} resources">{{ resource.grade.level.name }}</a>
+                        &rsaquo;
+                        <a class="underline" href="{% url 'resources:list' %}?grade={{ resource.grade.pk }}"
+                            title="View more {{ resource.grade.name|lower }} resources">{{ resource.grade.name }}</a>
+                    </span>
+
+                    <a href="{% url 'resources:list' %}?area={{ resource.learning_area.pk }}" title="View more {{ resource.learning_area.name|lower }} resources"
+                        class="px-2.5 py-1 rounded-full text-xs font-medium bg-brand-primary/20 text-brand-accent underline">
                       {{ resource.learning_area.name }}
-                    </span>
-                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-white/10 text-white/70">
-                      {{ resource.grade.level.name }} &rsaquo; {{ resource.grade.name }}
-                    </span>
-                        {% if resource.is_free %}
-                            <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">Free</span>
-                        {% endif %}
+                    </a>
+                    <a  href="{% url 'resources:type_detail' resource.resource_type %}" title="View more {{ resource.resource_type|lower }}"
+                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white/70 underline">
+                        {{ resource.resource_type }}
+                    </a>
+
                     </div>
                     <p class="mb-4  text-xs text-white/30">
                         {{ resource.downloads }} download{{ resource.downloads|pluralize }} &bull;
@@ -84,7 +96,7 @@
                         <button href="{{ resource.file.url }}"
                            id="downloadBtn"
                            onclick="incrementDownloads()"
-                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-primary hover:bg-brand-accent text-white font-semibold text-sm transition-colors shadow-lg shadow-brand-primary/30">
+                           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-gold/90 hover:bg-brand-gold text-white font-semibold text-sm transition-colors shadow-lg shadow-brand-gold/30">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>

@@ -25,7 +25,7 @@ from django.contrib import messages
 from .admin_views import VendorRequiredMixin
 from .forms import ResourceItemForm
 
-from .models import EducationLevel, LearningArea, ResourceItem
+from .models import EducationLevel, LearningArea, ResourceItem, Grade
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -101,6 +101,7 @@ class ResourceListView(ListView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["education_levels"] = EducationLevel.objects.prefetch_related("grades").order_by("order")
+        context["grades"] = Grade.objects.select_related("level")
         context["learning_areas"] = LearningArea.objects.order_by("name")
         context["resource_types"] = dict(ResourceItem._meta.get_field("resource_type").choices)
         context["current_grade"] = self.request.GET.get("grade", "")
@@ -108,6 +109,7 @@ class ResourceListView(ListView):
         context["current_level"] = self.request.GET.get("level", "")
         context["search_query"] = self.request.GET.get("q", "")
         context["current_resource_type"] = self.request.GET.get("resource_type", "")
+        context["current_grade"] = self.request.GET.get("grade", "")
 
         # Pre-fetch user favorites to avoid N+1 queries in the template
         if self.request.user.is_authenticated:

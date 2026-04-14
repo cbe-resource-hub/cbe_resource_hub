@@ -12,7 +12,7 @@
       CBC Learning Resources
     </h1>
     <p class="mt-2 text-white/60 text-sm">
-      Free curriculum-aligned materials for every grade and learning area.
+      Free curriculum-aligned materials every grade across all the learning areas.
     </p>
   </div>
 
@@ -25,18 +25,18 @@
         class="mb-8 flex flex-wrap gap-3 items-end">
 
     <!-- Search -->
-    <div class="flex-1 min-w-50">
+    <div class="flex-1 min-w-48">
       <label for="id_q" class="block text-xs text-white/50 mb-1">Search</label>
       <input id="id_q" type="search" name="q" value="{{ search_query }}"
              placeholder="e.g. Integrated Science Notes…"
-             class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-primary transition" />
+             class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-brand-gold transition" />
     </div>
 
     <!-- Education Level -->
-    <div class="min-w-37.5">
+    <div class="min-w-36">
       <label for="id_level" class="block text-xs text-white/50 mb-1">Level</label>
       <select id="id_level" name="level"
-              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition">
+              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-gold transition">
         <option value="">All Levels</option>
         {% for level in education_levels %}
         <option value="{{ level.pk }}" {% if current_level == level.pk|stringformat:"s" %}selected{% endif %}>
@@ -46,11 +46,25 @@
       </select>
     </div>
 
+    <!-- Grade -->
+    <div class="min-w-20">
+      <label for="id_grade" class="block text-xs text-white/50 mb-1">Grade</label>
+      <select id="id_grade" name="grade"
+              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-gold transition">
+        <option value="">All Grades</option>
+        {% for grade in grades %}
+        <option value="{{ grade.pk }}" {% if current_grade == grade.pk|stringformat:"s" %}selected{% endif %}>
+          {{ grade.name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
     <!-- Learning Area -->
-    <div class="min-w-37.5">
+    <div class="min-w-26">
       <label for="id_area" class="block text-xs text-white/50 mb-1">Subject</label>
       <select id="id_area" name="area"
-              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition">
+              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-gold transition">
         <option value="">All Subjects</option>
         {% for area in learning_areas %}
         <option value="{{ area.pk }}" {% if current_area == area.pk|stringformat:"s" %}selected{% endif %}>
@@ -61,10 +75,10 @@
     </div>
 
     <!-- Resource Type -->
-    <div class="min-w-37.5">
+    <div class="min-w-28">
       <label for="id_resource_type" class="block text-xs text-white/50 mb-1">Resource Type</label>
       <select id="id_resource_type" name="resource_type"
-              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition">
+              class="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-gold transition">
         <option value="">All Types</option>
         {% for resource_type in resource_types %}
         <option value="{{ resource_type }}" {% if current_resource_type == resource_type|stringformat:"s" %}selected{% endif %}>
@@ -75,7 +89,7 @@
     </div>
 
     <button type="submit"
-            class="px-5 py-2 rounded-lg bg-brand-primary hover:bg-brand-accent text-white text-sm font-semibold transition-colors shadow-lg shadow-brand-primary/20">
+            class="px-5 py-2 rounded-lg bg-brand-gold/90 hover:bg-brand-gold text-white text-sm font-semibold transition-colors shadow-lg shadow-brand-gold/20">
       Filter
     </button>
   </form>
