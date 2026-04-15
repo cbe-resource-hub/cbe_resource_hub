@@ -1,5 +1,5 @@
 """
-Django settings for cbe_res_hub — Django 6.0+ currently on (6.0.3)
+Django settings for cbe_res_hub — Django 6.0+ currently on (6.0.4)
 
 Sections:
     1.  Core / Security
@@ -231,7 +231,6 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-
 # ──────────────────────────────────────────────────────────────────────────────
 # 7. STORAGE  (Cloudflare R2 — dual-bucket | Local filesystem — dev)
 #
@@ -259,16 +258,7 @@ _private_r2 = bool(_cf_settings.CLOUDFLARE_R2_CONFIG_OPTIONS)
 _public_r2 = bool(_cf_settings.CLOUDFLARE_R2_PUBLIC_CONFIG_OPTIONS)
 
 # ── Backup bucket (shared config, independent of private/public buckets) ──────
-_BACKUP_R2_OPTIONS: dict = {
-    "access_key": os.getenv("BACKUP_R2_ACCESS_KEY_ID"),
-    "secret_key": os.getenv("BACKUP_R2_SECRET_ACCESS_KEY"),
-    "bucket_name": os.getenv("BACKUP_R2_BUCKET_NAME"),
-    "region_name": os.getenv("BACKUP_R2_REGION", "auto"),
-    "endpoint_url": os.getenv("BACKUP_R2_ENDPOINT"),
-    "default_acl": "private",
-    "file_overwrite": False,
-    "location": "database-backups",
-}
+_backup_r2 = bool(_cf_settings.CLOUDFLARE_R2_BACKUP_CONFIG_OPTIONS)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 8. STATIC & MEDIA URLs / Paths
@@ -336,7 +326,7 @@ LOGIN_ON_EMAIL_CONFIRMATION = True  # auto-login after clicking link
 LOGIN_ON_PASSWORD_RESET = True  # auto-login after password reset
 ACCOUNT_SESSION_REMEMBER = True  # persistent sessions by default
 
-LOGOUT_ON_GET = True # Logout user immediately after they click/hit the logout endpoint
+LOGOUT_ON_GET = True  # Logout user immediately after they click/hit the logout endpoint
 
 # Rate limits (per django-allauth v0.60+ format)
 ACCOUNT_RATE_LIMITS = {
@@ -356,7 +346,7 @@ ALLAUTH_UI_THEME = "dark"
 
 # ── Google OAuth ──────────────────────────────────────────────────────────────
 
-GOOGLE_OAUTH_CLIENT_ID= os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
 GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -644,7 +634,7 @@ if os.getenv("SENTRY_DSN"):
 TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
     "height": 800,
-    "width": 1100,
+    "width": "100%",
     "menubar": "file edit view insert format tools table help",
     "plugins": (
         "accordion autosave autoresize advlist autolink lists link image charmap "
@@ -676,7 +666,6 @@ DBBACKUP_CONNECTORS = {
 DBBACKUP_FILENAME_TEMPLATE = "{databasename}-{datetime}.{extension}"
 DBBACKUP_DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
 DBBACKUP_DATABASES = ["default"]
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 20. MISC / SITE IDENTITY
@@ -735,8 +724,8 @@ if _prod:
             },
             # Database backups — dedicated isolated bucket
             "dbbackup": {
-                "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-                "OPTIONS": _BACKUP_R2_OPTIONS,
+                "BACKEND": "helpers.cloudflare.storages.DbBackupPrivateStorage",
+                "OPTIONS": _cf_settings.CLOUDFLARE_R2_BACKUP_CONFIG_OPTIONS,
             },
         }
 
@@ -760,8 +749,8 @@ else:
         "protected": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "dbbackup": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": _BACKUP_R2_OPTIONS,
+            "BACKEND": "helpers.cloudflare.storages.DbBackupPrivateStorage",
+            "OPTIONS": _cf_settings.CLOUDFLARE_R2_BACKUP_CONFIG_OPTIONS,
         },
     }
 
@@ -785,6 +774,15 @@ if "pytest" in sys.modules or "test" in sys.argv:
     INSTALLED_APPS = DEFAULT_APPS + MY_APPS + THIRD_PARTY_APPS
     MIDDLEWARE = MAIN_MIDDLEWARE
 
+    # ── Local filesystem (development default) ────────────────────────────────
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+        "protected": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "dbbackup": {"BACKEND": "django.core.files.storage.FileSystemStorage", },
+    }
+
 cache_timeout_env_var = os.getenv("CACHE_TIMEOUT")
 CACHE_TIMEOUT: int = int(cache_timeout_env_var) if cache_timeout_env_var else 2419200
 
@@ -793,7 +791,6 @@ CONTACT_EMAIL: str = str(contact_email_env_var) if contact_email_env_var else ""
 
 contact_phone_env_var = os.getenv("CONTACT_PHONE")
 CONTACT_PHONE: str = str(contact_phone_env_var) if contact_phone_env_var else ""
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Quick reference

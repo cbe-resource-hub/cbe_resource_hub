@@ -12,7 +12,7 @@ def user(db):
     return CustomUser.objects.create_user(
         email="test@example.com",
         password="password123",
-        role=CustomUser.Role.LEARNER
+        role=CustomUser.Role.USER
     )
 
 @pytest.fixture
@@ -24,10 +24,10 @@ def admin_user(db):
     )
 
 @pytest.fixture
-def staff_user(db):
+def staff_vendor(db):
     return CustomUser.objects.create_user(
         email="staff@example.com",
         password="password123",
-        role=CustomUser.Role.VETTER,
+        role=CustomUser.Role.VENDOR,
         is_staff=True
     )

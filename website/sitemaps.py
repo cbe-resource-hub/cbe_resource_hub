@@ -68,36 +68,26 @@ class ResourceTypeSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
+        from django.db.models import Max
         RESOURCE_TYPES = [
-            (key, label)
+            key
             for key, label in ResourceItem._meta.get_field("resource_type").choices
         ]
-        keys: list[str] = []
-        for key, label in RESOURCE_TYPES:
-            keys.append(f"{key}")
+        
+        agg = ResourceItem.objects.values('resource_type').annotate(
+            latest_update=Max('updated_at')
+        )
+        self.type_updates = {
+            item['resource_type']: item['latest_update'] for item in agg
+        }
 
-        return keys
+        return RESOURCE_TYPES
 
     def location(self, obj):
         return reverse("resources:type_detail", kwargs={"resource_type": obj})
 
-    qs: QuerySet[ResourceItem] = (
-        ResourceItem.objects.only(
-            "resource_type",
-            "updated_at",
-            "id"
-        )
-        .order_by("-updated_at")
-    )
-
     def lastmod(self, obj):
-
-        try:
-            resources_updated_at = self.qs.filter(resource_type=obj).last()
-            if resources_updated_at:
-                return resources_updated_at.updated_at
-        except ResourceItem.DoesNotExist:
-            pass
+        return getattr(self, 'type_updates', {}).get(obj)
 
 
 class PartnerSitemap(Sitemap):
