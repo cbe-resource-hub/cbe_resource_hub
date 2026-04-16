@@ -2,39 +2,39 @@
 
 from django.contrib import admin
 
+from seo.admin import SEOAdminMixin
 from .models import EducationLevel, Grade, LearningArea, ResourceItem
 
 
 @admin.register(EducationLevel)
-class EducationLevelAdmin(admin.ModelAdmin):
+class EducationLevelAdmin(SEOAdminMixin, admin.ModelAdmin):
     list_display = ("name", "slug", "order")
     prepopulated_fields = {"slug": ("name",)}
-    ordering = ("order", "name")
 
 
 class GradeInline(admin.TabularInline):
     model = Grade
     extra = 2
-    fields = ("name", "order")
+    fields = ("name", "order", "slug")
     ordering = ("order",)
 
 
 @admin.register(Grade)
-class GradeAdmin(admin.ModelAdmin):
-    list_display = ("name", "level", "order")
+class GradeAdmin(SEOAdminMixin, admin.ModelAdmin):
+    list_display = ("name","slug" ,"level", "order")
     list_filter = ("level",)
-    ordering = ("level__order", "order", "name")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(LearningArea)
-class LearningAreaAdmin(admin.ModelAdmin):
+class LearningAreaAdmin(SEOAdminMixin, admin.ModelAdmin):
     list_display = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
     ordering = ("name",)
 
 
 @admin.register(ResourceItem)
-class ResourceItemAdmin(admin.ModelAdmin):
+class ResourceItemAdmin(SEOAdminMixin, admin.ModelAdmin):
     list_display = (
         "title",
         "grade",

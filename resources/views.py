@@ -17,6 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
@@ -275,6 +276,47 @@ class ResourceTypeDetailView(ListView):
         # For related types sidebar / cross-links
         ctx["all_resource_types"] = RESOURCE_TYPE_INFO
         return ctx
+
+def slug_to_title(slug: str) -> str:
+    slug = slug
+    if "-" in slug:
+        slug = slug.replace("-", " ")
+    if "_" in slug:
+        slug = slug.replace("_", " ")
+    slug = slug.title()
+    return slug
+
+
+class EducationLevelDetailsView(ListView):
+    """
+    SEO-optimized landing page for a specific Education Level.
+
+    URL: /resources/education-levels/<education_level>/
+
+    """
+    model = EducationLevel
+    template_name = "resources/education_level_details.html"
+    context_object_name = "resources"
+    paginate_by = 12
+
+    def get_queryset(self) -> QuerySet[ResourceItem]:
+        self.education_level = self.kwargs["education_level"]
+        return (
+            ResourceItem.objects.filter(grade__level__slug=self.education_level)
+            .select_related("grade", "grade__level", "learning_area")
+        )
+
+    def get_context_data(
+        self, **kwargs: Any
+    ) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["education_level"] = get_object_or_404(EducationLevel, slug=self.education_level)
+
+        context["education_level_count"] = self.get_queryset().count()
+        context["all_education_levels"] = EducationLevel.objects.prefetch_related("grades")
+
+        return context
+
 
 
 # user/vendor resource crud views

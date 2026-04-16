@@ -14,6 +14,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 from tinymce.models import HTMLField
@@ -21,7 +22,7 @@ from tinymce.models import HTMLField
 from seo.models import SEOModel, SlugRedirectMixin
 
 
-class EducationLevel(models.Model):
+class EducationLevel(SEOModel, models.Model):
     """
     Top-level curriculum classification.
 
@@ -29,8 +30,8 @@ class EducationLevel(models.Model):
               Junior Secondary, Senior Secondary.
     """
 
-    name: str = models.CharField(max_length=100, unique=True)
-    slug: str = models.SlugField(max_length=100, unique=True, db_index=True)
+    name: str = models.CharField(max_length=100)
+    slug: str = models.SlugField(max_length=110, unique=True, db_index=True)
     order: int = models.PositiveIntegerField(
         default=0,
         help_text="Display order in selects and navigation.",
@@ -39,18 +40,27 @@ class EducationLevel(models.Model):
     class Meta:
         verbose_name = "Education Level"
         verbose_name_plural = "Education Levels"
-        ordering = ["order", "name"]
+        ordering = ["order", "slug"]
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"),
+                name="unique_education_level_name",
+                violation_error_message="Education level name must be unique"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name
 
     def save(self, *args, **kwargs) -> None:
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.name)[:110]
+        if self.name and not self.meta_title:
+            self.meta_title = self.name
         super().save(*args, **kwargs)
 
 
-class Grade(models.Model):
+class Grade(SEOModel, models.Model):
     """
     A specific grade/class within an EducationLevel.
 
@@ -64,18 +74,27 @@ class Grade(models.Model):
     )
     name: str = models.CharField(max_length=50)
     order: int = models.PositiveIntegerField(default=0)
+    slug: str = models.SlugField(max_length=60, unique=True, db_index=True)
+
+    def save(self, *args, **kwargs):
+        if self.name and not self.slug:
+            self.slug = slugify(self.name)[:60]
+        if self.name and not self.meta_title:
+            self.meta_title = self.name
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Grade"
         verbose_name_plural = "Grades"
         ordering = ["level__order", "order", "name"]
-        unique_together = [("level", "name")]
+        unique_together = [("level", "slug")]
 
     def __str__(self) -> str:
         return f"{self.level.name} — {self.name}"
 
 
-class LearningArea(models.Model):
+class LearningArea(SEOModel, models.Model):
     """
     A subject / learning area in the CBC curriculum.
 
@@ -83,20 +102,22 @@ class LearningArea(models.Model):
               Integrated Science, Social Studies.
     """
 
-    name: str = models.CharField(max_length=100, unique=True)
-    slug: str = models.SlugField(max_length=100, unique=True, db_index=True)
+    name: str = models.CharField(max_length=100)
+    slug: str = models.SlugField(max_length=110, unique=True, db_index=True)
 
     class Meta:
         verbose_name = "Learning Area"
         verbose_name_plural = "Learning Areas"
-        ordering = ["name"]
+        ordering = ["slug"]
 
     def __str__(self) -> str:
         return self.name
 
     def save(self, *args, **kwargs) -> None:
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.name)[:110]
+        if self.name and not self.meta_title:
+            self.meta_title = self.name
         super().save(*args, **kwargs)
 
 
@@ -113,7 +134,7 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
     title: str = models.CharField(max_length=255)
     slug: str = models.SlugField(
         unique=True,
-        max_length=255,
+        max_length=265,
         db_index=True,
     )
     description: str = HTMLField()
@@ -198,7 +219,7 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
 
     def save(self, *args, **kwargs) -> None:
         if not self.slug:
-            self.slug = slugify(self.title)[:50]
+            self.slug = slugify(self.title)[:265]
         if self.title and not self.meta_title:
             self.meta_title = self.title[:60]
         if self.description and not self.meta_description:

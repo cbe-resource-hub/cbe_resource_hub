@@ -17,10 +17,13 @@ urlpatterns = [
     path("<slug:slug>/edit/", views.ResourceUpdateView.as_view(), name="manage_edit"),
     path("<slug:slug>/delete/", views.ResourceDeleteView.as_view(), name="manage_delete"),
 
+    # public resources endpoints
     path("", views.ResourceListView.as_view(), name="list"),
 
     path("type/sitemap.xml", sitemap, {'sitemaps': resources_types_sitemaps}, name="type_sitemaps"),
     re_path(r'^type(?:/(?P<resource_type>[-\w]+))?/$', views.ResourceTypeDetailView.as_view(), name="type_detail"),
+
+    re_path(r'^education-levels(?:/(?P<education_level>[-\w]+))?/$', views.EducationLevelDetailsView.as_view(), name="education_level_details"),
 
     path("<slug:slug>/favorite/", views.ToggleFavoriteView.as_view(), name="toggle_favorite"),
 
