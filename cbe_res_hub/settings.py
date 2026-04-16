@@ -29,6 +29,7 @@ from __future__ import annotations
 import ast
 import logging
 import os
+import re
 import ssl
 import sys
 from datetime import timedelta
@@ -72,7 +73,6 @@ INTERNAL_IPS: list[str] = ["127.0.0.1"]
 # 2. APPLICATION DEFINITION
 # ──────────────────────────────────────────────────────────────────────────────
 DEFAULT_APPS: list[str] = [
-    "daphne",  # ASGI server — must be FIRST for channels
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -368,10 +368,22 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_LOGIN_ON_GET = True  # allow GET-based OAuth callback
 
+
 # ──────────────────────────────────────────────────────────────────────────────
 # 10. INTERNATIONALISATION
 # ──────────────────────────────────────────────────────────────────────────────
+
+def gettext_noop(s):
+    return s
+
+
 LANGUAGE_CODE = "en-us"
+LANGUAGES = [
+    ("en", gettext_noop("English")),
+    ("sw", gettext_noop("Swahili")),
+]
+LANGUAGES_BIDI = []  # should remain empty since both English and Swahili don't need rtl
+
 TIME_ZONE = "Africa/Nairobi"
 USE_I18N = True
 USE_TZ = True
@@ -407,36 +419,9 @@ if _redis_url and _redis_url.startswith("rediss://"):
     CELERY_REDIS_BACKEND_USE_SSL = _ssl_config
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 13. DJANGO CHANNELS / ASGI
+# 13. ASGI
 # ──────────────────────────────────────────────────────────────────────────────
 ASGI_APPLICATION = "cbe_res_hub.asgi.application"
-
-if _redis_url:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [
-                    {
-                        "address": _redis_url,
-                        "password": _redis_password or None,
-                    }
-                ],
-                "prefix": "cbe_asgi:",
-                "channel_capacity": {
-                    "http.request": 200,
-                    "http.response!*": 100,
-                    "websocket.send!*": 100,
-                },
-            },
-        }
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        }
-    }
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 14. LOGGING
@@ -529,6 +514,11 @@ LOGGING = {
             "formatter": "verbose",
             "filters": ["require_debug_true"],
         },
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"] if _prod else ["require_debug_true"],
+            "class": "django.utils.log.AdminEmailHandler",
+        }
     },
 
     "loggers": {
@@ -538,7 +528,7 @@ LOGGING = {
             "propagate": False,
         },
         "django": {
-            "handlers": ["stdout", "stderr"],
+            "handlers": ["stdout", "stderr", "mail_admins"],
             "level": "INFO",
             "propagate": False,
         },
@@ -548,7 +538,7 @@ LOGGING = {
             "propagate": False,
         },
         "django.security": {
-            "handlers": ["stdout", "stderr"],
+            "handlers": ["stdout", "stderr", ],
             "level": "WARNING",
             "propagate": False,
         },
@@ -558,22 +548,22 @@ LOGGING = {
             "propagate": False,
         },
         "accounts": {
-            "handlers": ["app_file", "error_file", "structured"],
+            "handlers": ["app_file", "error_file", "structured", ],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "cms": {
-            "handlers": ["app_file", "error_file", "structured"],
+            "handlers": ["app_file", "error_file", "structured", ],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "resources": {
-            "handlers": ["app_file", "error_file", "structured"],
+            "handlers": ["app_file", "error_file", "structured", ],
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
         "celery": {
-            "handlers": ["celery_file", "stdout", "stderr"],
+            "handlers": ["celery_file", "stdout", "stderr", ],
             "level": "INFO",
             "propagate": False,
         },
@@ -659,7 +649,7 @@ TAGGIT_CASE_INSENSITIVE: bool = True
 # ──────────────────────────────────────────────────────────────────────────────
 # 19. DATABASE BACKUPS (django-dbbackup)
 # ──────────────────────────────────────────────────────────────────────────────
-DBBACKUP_CLEANUP_KEEP: int = 7
+DBBACKUP_CLEANUP_KEEP: int = 14
 DBBACKUP_CLEANUP_KEEP_MEDIA: int = 0
 DBBACKUP_CONNECTORS = {
     "default": {"CONNECTOR": "dbbackup.db.postgresql.PgDumpConnector"}
@@ -673,8 +663,9 @@ DBBACKUP_DATABASES = ["default"]
 # ──────────────────────────────────────────────────────────────────────────────
 SITE_URL: str = os.getenv("SITE_URL")
 SITE_NAME: str = os.getenv("SITE_NAME")
-ADMINS: list[tuple[str, str]] = [(os.getenv("ADMIN_NAME"), os.getenv("ADMIN_EMAIL"))]
-
+admin_email = os.getenv("ADMIN_EMAIL")
+ADMINS: list[tuple[str, str]] = [(os.getenv("ADMIN_NAME"), admin_email)]
+SERVER_EMAIL: str = admin_email
 PHONENUMBER_DB_FORMAT: str = "E164"
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -781,7 +772,12 @@ if "pytest" in sys.modules or "test" in sys.argv:
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
         "protected": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
         "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "dbbackup": {"BACKEND": "django.core.files.storage.FileSystemStorage", },
+        "dbbackup": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {
+                "location": "database-backups",
+            },
+        },
     }
 
 cache_timeout_env_var = os.getenv("CACHE_TIMEOUT")
@@ -793,9 +789,22 @@ CONTACT_EMAIL: str = str(contact_email_env_var) if contact_email_env_var else ""
 contact_phone_env_var = os.getenv("CONTACT_PHONE")
 CONTACT_PHONE: str = str(contact_phone_env_var) if contact_phone_env_var else ""
 
+IGNORABLE_404_URLS = [
+    re.compile(r'^/favicon.ico$'),
+    re.compile(r'^/apple-touch-icon.*\.png$'),
+]
+
+#     DISALLOWED_USER_AGENTS = [
+#         re.compile(r'^NaverBot.*'),
+#         re.compile(r'^EmailSiphon.*'),
+#         re.compile(r'^SiteSucker.*'),
+#         re.compile(r'^sohu-search'),
+#     ] # to uncomment and add some
+DISALLOWED_USER_AGENTS = []  # to add
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Quick reference
-#   daphne -p 8000 cbe_res_hub.asgi:application
+#   gunicorn cbe_res_hub.wsgi:application --workers=2 --threads=2 --timeout=500 --log-level=info
 #   celery -A cbe_res_hub worker -l INFO
 #   celery -A cbe_res_hub beat -l INFO
 #   python -c "import secrets; print(secrets.token_urlsafe(64))"

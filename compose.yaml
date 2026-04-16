@@ -3,7 +3,7 @@
 # Services:
 #   - redis         → cache + celery broker/backend
 #   - traefik       → reverse proxy (HTTP :80), Cloudflare IP restoration
-#   - web           → Django/Daphne (3 replicas)
+#   - web           → Django/Gunicorn (3 replicas)
 #   - celery_worker → background task runner
 #   - celery_beat   → background task scheduler
 #

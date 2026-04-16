@@ -1,9 +1,9 @@
 # Fixes 
 1. excelent everything is working as expected
 
-also on that page there is an icon next to retry icon in actions column for failed task to maybe view more that does nothing when clicked, id like it to open in a modal that is professionally designed and moderdn with the details of the notification
+also on the notifications list page there is an icon next to retry icon in actions column for failed task to maybe view more that does nothing when clicked, id like it to open in a modal that is professionally designed and modern with the details of the notification,, not just for failed task but for all tasks
 
-aslo id like a way to delete notifications that are only already sent or failed the others that are pending should not be deletable untill
+also id like a way to delete notifications that are only already sent or failed the others that are pending should not be deletable
 
 also ui on this page and the layout and style should match what other list pages have
 

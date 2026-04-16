@@ -3,7 +3,6 @@ Celery configuration for CBE Resources Hub project.
 
 Design goals:
 - Prevent task pile-ups after restart
-- Preserve existing task names and behavior
 
 Key principles used:
 - Expiration on time-sensitive tasks
@@ -74,7 +73,7 @@ app.conf.beat_schedule = {
 
     "daily-database-backup": {
         "task": "website.tasks.backup_database",
-        "schedule": crontab(hour=3, minute=45),
+        "schedule": crontab(hour=0, minute=30), # at 12:30 am
         "kwargs": {"backup_type": "daily"},
         "options": {
             "expires": 3600,
@@ -83,7 +82,7 @@ app.conf.beat_schedule = {
 
     "weekly-full-backup": {
         "task": "website.tasks.backup_database",
-        "schedule": crontab(hour=3, minute=45, day_of_week=0),
+        "schedule": crontab(hour=0, minute=45, day_of_week=0), # every sunday at 12:45 am
         "kwargs": {"backup_type": "weekly"},
         "options": {
             "expires": 3600,
@@ -92,8 +91,8 @@ app.conf.beat_schedule = {
 
     "cleanup-old-backups": {
         "task": "website.tasks.cleanup_old_backups",
-        "schedule": crontab(hour=4, minute=15),
-        "kwargs": {"keep_days": 7},
+        "schedule": crontab(hour=1, minute=15), # at 1:45 am daily
+        "kwargs": {"keep_days": 14},
         "options": {
             "expires": 1800,
         },

@@ -20,4 +20,4 @@ echo "Prepopulating Primary Header and Footer menus..................."
 python manage.py populate_menus
 
 echo "Starting application............................................"
-exec daphne -b 0.0.0.0 -p 8000 cbe_res_hub.asgi:application
+exec gunicorn cbe_res_hub.wsgi:application --workers=2 --threads=2 --timeout=500 --log-level=info
