@@ -1,13 +1,15 @@
 # 📧 Notification System
 
-A robust, asynchronous, and fault-tolerant system for handling all system-generated emails (signups, contact forms, security alerts, and resource uploads).
+A robust, asynchronous, and fault-tolerant system for handling all system-generated emails (signups, contact forms,
+security alerts, and resource uploads).
 
 ## 🚀 Key Features
 
 - **Asynchronous Delivery**: All emails are queued via Celery tasks to prevent blocking the request-response cycle.
 - **Fault Tolerance**: Automatic exponential backoff retries (e.g., 1m, 2m, 4m...) for failed deliveries.
 - **Idempotency**: Prevents sending duplicate emails for the same event using unique `idempotency_key` generation.
-- **Delivery Monitoring**: Full history of sent, pending, and failed notifications available in the custom Management Panel.
+- **Delivery Monitoring**: Full history of sent, pending, and failed notifications available in the custom Management
+  Panel.
 - **Manual Retries**: Admins can manually trigger retries for failed notifications directly from the dashboard.
 - **Rate Limiting**: Integrated `rate_limit="10/m"` to protect SMTP throughput and avoid being flagged as spam.
 
@@ -42,6 +44,7 @@ notifier.notify_resource_upload(resource_item_obj)
 ## 📋 Management Dashboard
 
 Access the notification history via the **System > Notifications** section in the sidebar.
+
 - **Search**: Filter by recipient, subject, or type.
 - **Status Pills**: Quickly identify `SENT`, `FAILED`, or `RETRYING` messages.
 - **Error Logs**: Click the info icon on failed messages to see the exact SMTP or logic error.
