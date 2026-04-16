@@ -26,8 +26,10 @@ urlpatterns = [
     re_path(r'^education-levels(?:/(?P<education_level>[-\w]+))?/$', views.EducationLevelDetailsView.as_view(),
             name="education_level_details"),
 
+    path("grades/", views.GradeListView.as_view(), name="grade_list"),
     re_path(r'^grades(?:/(?P<grade>[-\w]+))?/$', views.GradeDetailsView.as_view(), name="grade_details"),
 
+    path("learning-areas/", views.LearningAreaListView.as_view(), name="learning_areas_list"),
     re_path(r'learning-areas(?:/(?P<learning_area>[-\w]+))?/$', views.LearningAreaDetailsView.as_view(),
             name="learning_area_details"),
 

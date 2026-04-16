@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -70,7 +70,6 @@ class ResourceListView(ListView):
                 "vendor",
             )
             .filter(is_free=True)  # default: show free resources; extend for marketplace
-            .order_by("-created_at")
         )
 
         # --- Optional filtering via GET params ---
@@ -89,9 +88,8 @@ class ResourceListView(ListView):
         if level_id:
             qs = qs.filter(grade__level_id=level_id)
         if q:
-            from django.db.models import Q as DQ
             qs = qs.filter(
-                DQ(title__icontains=q) | DQ(description__icontains=q)
+                Q(title__icontains=q) | Q(description__icontains=q)
             )
         if resource_type:
             qs = qs.filter(resource_type=resource_type)
@@ -331,8 +329,6 @@ class LearningAreaDetailsView(ListView):
         return context
 
 
-
-
 class GradeDetailsView(ListView):
     """
     SEO-optimized landing page for a specific Grade.
@@ -358,6 +354,110 @@ class GradeDetailsView(ListView):
         return context
 
 
+class LearningAreaListView(ListView):
+    """
+    SEO-optimized landing page for all Learning Areas.
+    URL: `/resources/learning-areas/`
+    Paginated list of the Learning Areas with infinite scrolling.
+    Returns:
+        - Full page template ``resources/learning_areas_list.html`` for normal requests
+        - Partial template ``resources/partials/filter_cards.html`` for HTMX requests
+    """
+
+    model = LearningArea
+    paginate_by = 12
+    template_name = "resources/learning_areas_list.html"
+    partial_template_name = "resources/partials/filter_cards.html"
+    context_object_name = "filters"
+
+    def get_queryset(self) -> QuerySet[LearningArea]:
+        """
+        Return all Learning Areas with infinite scrolling.
+        """
+
+        qs: QuerySet[LearningArea] = (
+            LearningArea.objects.all()
+            .prefetch_related("resources")
+        )
+
+        q = self.request.GET.get("q")
+        q = q.strip() if q else None
+
+        if q:
+            qs = qs.filter(name__icontains=q)
+
+        return qs
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q")
+
+        return context
+
+    def render_to_response(
+            self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        """
+        Return a partial HTML snippet for HTMX requests; full page otherwise.
+        """
+
+        if self.request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
+
+        return super().render_to_response(context, **response_kwargs)
+
+
+class GradeListView(ListView):
+    """
+    SEO-optimized landing page for all Grades.
+    URL: `/resources/grades/`
+    Paginated list of the Grades with infinite scrolling.
+    Returns:
+        - Full page template ``resources/grade_list.html`` for normal requests
+        - Partial template ``resources/partials/filter_cards.html`` for HTMX requests
+    """
+    
+    model = Grade
+    page_size = 12
+    template_name = "resources/grade_list.html"
+    partial_template_name = "resources/partials/filter_cards.html"
+    context_object_name = "filters"
+    
+    def get_queryset(self) -> QuerySet[Grade]:
+        """
+        Return all Grades with infinite scrolling.
+        """
+        
+        qs: QuerySet[Grade] = (
+            Grade.objects.all()
+            .prefetch_related("resources")
+        )
+        
+        q = self.request.GET.get("q")
+        q = q.strip() if q else None
+        
+        if q:
+            qs = qs.filter(name__icontains=q)
+        
+        return qs
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("q")
+        
+        return context
+    
+    def render_to_response(
+            self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        """
+        Return a partial HTML snippet for HTMX requests; full page otherwise.
+        """
+        
+        if self.request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
+        return super().render_to_response(context, **response_kwargs)
+        
 # user/vendor resource crud views
 class ResourceCreateView(VendorRequiredMixin, CreateView):
     model = ResourceItem

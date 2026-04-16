@@ -32,12 +32,16 @@ EDUCATION_LEVELS = EducationLevel.objects.filter()
 PRIMARY_ITEMS = [
     ("Home", "/", 0),
     ("Resources", "/resources/", 10),
-    ("Contact", "/contact/", 30),
+    ("Learning Areas", reverse("resources:learning_areas_list"), 30),
+    ("Grades", reverse("resources:grade_list"), 31),
+    ("Contact", "/contact/", 32),
 ]
 
 # Items added only to the footer Quick Links column.
 FOOTER_ONLY_ITEMS: list[tuple[str, str, int]] = [
-    ("Partners", "/partners/", 31),
+    ("Learning Areas", reverse("resources:learning_areas_list"), 33),
+    ("Grades", reverse("resources:grade_list"), 34),
+    ("Partners", "/partners/", 35),
 ]
 
 

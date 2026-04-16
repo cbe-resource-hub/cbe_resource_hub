@@ -15,6 +15,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
+from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 from tinymce.models import HTMLField
@@ -76,6 +77,9 @@ class Grade(SEOModel, models.Model):
     order: int = models.PositiveIntegerField(default=0)
     slug: str = models.SlugField(max_length=60, unique=True, db_index=True)
 
+    def get_absolute_url(self) -> str:
+        return reverse("resources:grade_details", kwargs={"grade": self.slug})
+
     def save(self, *args, **kwargs):
         if self.name and not self.slug:
             self.slug = slugify(self.name)[:60]
@@ -104,6 +108,9 @@ class LearningArea(SEOModel, models.Model):
 
     name: str = models.CharField(max_length=100)
     slug: str = models.SlugField(max_length=110, unique=True, db_index=True)
+
+    def get_absolute_url(self) -> str:
+        return reverse("resources:learning_area_details", kwargs={"learning_area": self.slug})
 
     class Meta:
         verbose_name = "Learning Area"
@@ -234,7 +241,6 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
         return super().delete(using=using, keep_parents=keep_parents)
 
     def get_absolute_url(self) -> str:
-        from django.urls import reverse
         return reverse("resources:resource_detail", kwargs={"slug": self.slug})
 
     def increment_downloads(self) -> None:
