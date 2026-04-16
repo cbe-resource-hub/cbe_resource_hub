@@ -294,7 +294,7 @@ class EducationLevelDetailsView(ListView):
         self.education_level = self.kwargs["education_level"]
         return (
             ResourceItem.objects.filter(grade__level__slug=self.education_level)
-            .select_related("grade", "grade__level",)
+            .select_related("grade", "grade__level", )
         )
 
     def get_context_data(
@@ -304,6 +304,33 @@ class EducationLevelDetailsView(ListView):
         context["education_level"] = get_object_or_404(EducationLevel, slug=self.education_level)
         context["all_education_levels"] = EducationLevel.objects.all()
         return context
+
+
+class LearningAreaDetailsView(ListView):
+    """
+    SEO-optimized landing page for a specific Learning Area.
+    URL: /resources/learning-areas/<learning_area>/
+    """
+    model = LearningArea
+    template_name = "resources/learning_area_details.html"
+    context_object_name = "resources"
+    paginate_by = 12
+
+    def get_queryset(self) -> QuerySet[ResourceItem]:
+        self.learning_area = self.kwargs["learning_area"]
+        return (
+            ResourceItem.objects.filter(learning_area__slug=self.learning_area)
+            .select_related("learning_area", )
+        )
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["learning_area"] = get_object_or_404(LearningArea, slug=self.learning_area)
+        context["all_learning_areas"] = LearningArea.objects.all()
+
+        return context
+
+
 
 
 class GradeDetailsView(ListView):
@@ -320,7 +347,7 @@ class GradeDetailsView(ListView):
         self.grade = self.kwargs["grade"]
         return (
             ResourceItem.objects.filter(grade__slug=self.grade)
-            .select_related("grade",)
+            .select_related("grade", )
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

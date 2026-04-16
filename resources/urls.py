@@ -28,6 +28,9 @@ urlpatterns = [
 
     re_path(r'^grades(?:/(?P<grade>[-\w]+))?/$', views.GradeDetailsView.as_view(), name="grade_details"),
 
+    re_path(r'learning-areas(?:/(?P<learning_area>[-\w]+))?/$', views.LearningAreaDetailsView.as_view(),
+            name="learning_area_details"),
+
     path("<slug:slug>/favorite/", views.ToggleFavoriteView.as_view(), name="toggle_favorite"),
 
     path('sitemap.xml', sitemap, {'sitemaps': resources_sitemaps}, name='resources_sitemap'),
