@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Max
 from django.urls import reverse
 
 from cms.models import Page
-from resources.models import ResourceItem
+from resources.models import ResourceItem, Grade, LearningArea, EducationLevel
 from website.models import Partner
 
 
@@ -23,7 +23,11 @@ class StaticViewSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return ["home", "contact", "partners", "resources:list"]
+        return [
+            "home", "contact", "partners",
+            "resources:list", "resources:grade_list",
+            "resources:learning_areas_list",
+        ]
 
     def location(self, item):
         return reverse(item)
@@ -68,12 +72,11 @@ class ResourceTypeSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        from django.db.models import Max
         RESOURCE_TYPES = [
             key
             for key, label in ResourceItem._meta.get_field("resource_type").choices
         ]
-        
+
         agg = ResourceItem.objects.values('resource_type').annotate(
             latest_update=Max('updated_at')
         )
@@ -90,9 +93,54 @@ class ResourceTypeSitemap(Sitemap):
         return getattr(self, 'type_updates', {}).get(obj)
 
 
+class GradeSitemap(Sitemap):
+    priority = 0.6
+    changefreq = "weekly"
+    protocol = "https" if not settings.DEBUG else "http"
+
+    def items(self):
+        return Grade.objects.all()
+
+    def location(self, obj):
+        return reverse("resources:grade_details", kwargs={"grade": obj.slug})
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
+class LearningAreaSitemap(Sitemap):
+    priority = 0.5
+    changefreq = "weekly"
+    protocol = "https" if not settings.DEBUG else "http"
+
+    def items(self):
+        return LearningArea.objects.all()
+
+    def location(self, obj):
+        return reverse("resources:learning_area_details", kwargs={"learning_area": obj.slug})
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
+class EducationLevelSitemap(Sitemap):
+    priority = 0.4
+    changefreq = "weekly"
+    protocol = "https" if not settings.DEBUG else "http"
+
+    def items(self):
+        return EducationLevel.objects.all()
+
+    def location(self, obj):
+        return reverse("resources:education_level_details", kwargs={"education_level": obj.slug})
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
 class PartnerSitemap(Sitemap):
     """Public partner entries."""
-    priority = 0.5
+    priority = 0.3
     changefreq = "monthly"
     protocol = "https" if not settings.DEBUG else "http"
 
@@ -110,4 +158,7 @@ sitemaps = {
     "resources": ResourceSitemap,
     "partners": PartnerSitemap,
     "resource_types": ResourceTypeSitemap,
+    "grades": GradeSitemap,
+    "learning_areas": LearningAreaSitemap,
+    "education_levels": EducationLevelSitemap,
 }
