@@ -30,8 +30,7 @@ class HomePageView(TemplateView):
             ResourceItem.objects.select_related(
                 "grade", "grade__level", "learning_area"
             )
-            .filter(is_free=True)
-            .order_by("-created_at")[:8]
+            .filter(is_free=True)[:8]
         )
 
         # Top 8 popular resources by downloads

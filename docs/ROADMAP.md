@@ -1,16 +1,25 @@
-# Fixes 
-1. excelent everything is working as expected
+# Fixes
 
-also on the notifications list page there is an icon next to retry icon in actions column for failed task to maybe view more that does nothing when clicked, id like it to open in a modal that is professionally designed and modern with the details of the notification,, not just for failed task but for all tasks
-
-also id like a way to delete notifications that are only already sent or failed the others that are pending should not be deletable
-
-also ui on this page and the layout and style should match what other list pages have
-
+1. Excellent everything is working as expected, also on the notifications list page `AdminNotificationListView`
+   there is an icon next to retry icon in actions column for failed task
+   to maybe view more that does nothing when clicked, id like it to open in a modal that is professionally designed and
+   modern with the details of the notification, not just for failed task but for all tasks also id like a way to delete
+   notifications that are only already sent or failed the others that are pending should not be deletable also ui on
+   this page and the layout and style should match what other list pages have
+2. On the `AdminFileListView` page the delete modal doesn't hide even after successful deletion id like it to hide
+   notification toast to show normally e.g. ny doing a full page reload or redirecting back to the list page after
+   action
+   so as messages toast can show and page refreshes/ re-renders with delete modal hidden
 
 # Features to add
-1.  Run through all routes in all urls and their respective views and ensure queries are 100% efficient and fast eliminating any n+1 issue and \
-and adding efficient caching strategies that are easy to work with or modify in future and updating documentation, eg the home page (/) route has 21 queries it may not have n+1 problem but all those queries are an issue, so optimization on all pages should be as follows:
-i) reduce number of db queries as much as possible without caching
-ii) after the reduced queries cache responses appropriately and efficiently and avoid bad cache policies like caching entire html page or lack of reliable invalidation strategies
+
+1. Run through all routes in all URLs and their respective views and ensure queries are 100% efficient and fast
+   eliminating any n+1 issue and \
+   and adding efficient caching strategies that are easy to work with or modify in future and updating documentation,
+   e.g.
+   the home page (/) route has 21 queries it may not have n+1 problem but all those queries are an issue, so
+   optimization on all pages should be as follows:
+   i) reduce number of db queries as much as possible without caching
+   ii) after the reduced queries cache responses appropriately and efficiently and avoid bad cache policies like caching
+   entire HTML page or lack of reliable invalidation strategies
 2. Adding comprehensive test cases for all apps covering all existing or potential issues and edge cases

@@ -20,6 +20,7 @@ from django.utils.html import strip_tags
 from django.utils.text import slugify
 from tinymce.models import HTMLField
 
+from resources.utils import PublicFilesStorageCallable, file_upload_path
 from seo.models import SEOModel, SlugRedirectMixin
 
 
@@ -128,6 +129,19 @@ class LearningArea(SEOModel, models.Model):
         super().save(*args, **kwargs)
 
 
+class ResourcesPublicFilesStorageCallable(PublicFilesStorageCallable):
+
+    def deconstruct(self):
+        """
+        Allow Django to serialize this for migrations.
+        """
+        return (
+            'resources.models.ResourcesPublicFilesStorageCallable',
+            [],
+            {}
+        )
+
+
 class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
     """
     The core document model — a downloadable educational resource.
@@ -160,7 +174,9 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
 
     # --- File Storage (Cloudflare R2 in production) ---
     file = models.FileField(
-        upload_to="resources/%Y/%m/",
+        upload_to=file_upload_path,
+        storage=ResourcesPublicFilesStorageCallable(),
+        max_length=300
     )
 
     # --- Multivendor Marketplace Future-Proofing ---
