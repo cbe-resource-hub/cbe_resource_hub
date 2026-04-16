@@ -3,7 +3,7 @@ cms/management/commands/populate_menus.py
 
 Idempotent command to seed the Primary Header and Footer menus with:
   - Primary Header:
-      Home  |  Resources  |  Categories ▾  (dropdown of all resource types)
+      Home  |  Resources  |  Categories ▾  (dropdown of all resource types) | Levels ▾  (dropdown of education levels)
   - Footer:
       Quick Links (same top-level items + nested Categories)
       Contact  (from site settings)
@@ -18,13 +18,14 @@ from django.db import transaction
 from django.urls import reverse
 
 from cms.models import Menu, MenuItem
-from resources.models import ResourceItem
-
+from resources.models import ResourceItem, EducationLevel
 
 RESOURCE_TYPES = [
     (key, label)
     for key, label in ResourceItem._meta.get_field("resource_type").choices
 ]
+
+EDUCATION_LEVELS = EducationLevel.objects.filter()
 
 # Top-level items that appear in both menus.
 # Each tuple: (title, url, order)
@@ -75,8 +76,25 @@ class Command(BaseCommand):
                 title=label,
                 defaults={"url": url, "order": order},
             )
+        # ── 4. "Education Levels" parent + education_level children (header) ──────
 
-        # ── 4. Top-level quick links for footer ────────────────────────────
+        education_levels_header, _ = MenuItem.objects.get_or_create(
+            menu=header_menu,
+            parent=None,
+            title="Education Levels",
+            defaults={"url": "#", "order": 20},
+        )
+        if EDUCATION_LEVELS.exists():
+            for order, education_level in enumerate(EDUCATION_LEVELS):
+                url = reverse("resources:education_level_details", kwargs={"education_level": education_level.slug})
+                MenuItem.objects.get_or_create(
+                    menu=header_menu,
+                    parent=education_levels_header,
+                    title=education_level.name,
+                    defaults={"url": url, "order": order},
+                )
+
+        # ── 5. Top-level quick links for footer ────────────────────────────
         for title, url, order in PRIMARY_ITEMS + FOOTER_ONLY_ITEMS:
             MenuItem.objects.get_or_create(
                 menu=footer_menu,
@@ -85,7 +103,7 @@ class Command(BaseCommand):
                 defaults={"url": url, "order": order},
             )
 
-        # ── 5. "Categories" parent + resource-type children (footer) ──────
+        # ── 6. "Categories" parent + resource-type children (footer) ──────
         categories_footer, _ = MenuItem.objects.get_or_create(
             menu=footer_menu,
             parent=None,
