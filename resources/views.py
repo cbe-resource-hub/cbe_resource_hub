@@ -328,17 +328,46 @@ class EducationLevelDetailsView(ListView):
     URL: /resources/education-levels/<education_level>/
 
     """
-    model = EducationLevel
     template_name = "resources/education_level_details.html"
+    partial_template_name = "resources/partials/resource_cards.html"
     context_object_name = "resources"
     paginate_by = 12
 
     def get_queryset(self) -> QuerySet[ResourceItem]:
         self.education_level = self.kwargs["education_level"]
-        return (
+        qs: QuerySet[ResourceItem] = (
             ResourceItem.objects.filter(grade__level__slug=self.education_level)
             .select_related("grade", "grade__level", )
         )
+
+        q = self.request.GET.get("q")
+        q = q.strip() if q else ''
+
+        learning_area_id = self.request.GET.get("learning_area")
+        learning_area_id = int(learning_area_id) if learning_area_id else None
+        grade_id = self.request.GET.get("grade")
+        grade_id = int(grade_id) if grade_id else None
+        education_level_id = self.request.GET.get("education_level")
+        education_level_id = int(education_level_id) if education_level_id else None
+        resource_type = self.request.GET.get("resource_type")
+        resource_type = str(resource_type) if resource_type else None
+
+        if q:
+            qs = qs.filter(
+                Q(title__icontains=q) | Q(description__icontains=q)
+            )
+        if learning_area_id:
+            qs = qs.filter(learning_area_id=learning_area_id)
+        if grade_id:
+            qs = qs.filter(grade_id=grade_id)
+
+        if education_level_id:
+            qs = qs.filter(grade__level__id=education_level_id)
+
+        if resource_type:
+            qs = qs.filter(resource_type=resource_type)
+
+        return qs
 
     def get_context_data(
             self, **kwargs: Any
@@ -346,7 +375,26 @@ class EducationLevelDetailsView(ListView):
         context = super().get_context_data(**kwargs)
         context["education_level"] = get_object_or_404(EducationLevel, slug=self.education_level)
         context["all_education_levels"] = EducationLevel.objects.all()
+        context["grades"] = Grade.objects.select_related("level")
+        context["learning_areas"] = LearningArea.objects.order_by("name")
+        context["resource_types"] = dict(ResourceItem._meta.get_field("resource_type").choices)
+
+        context['current_learning_area'] = self.request.GET.get("learning_area", '')
+        context['current_resource_type'] = self.request.GET.get("resource_type", '')
+        context['current_grade'] = self.request.GET.get("grade", '')
+        context['search_query'] = self.request.GET.get("q", '')
+
         return context
+
+    def render_to_response(
+            self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        """
+        Return a partial HTML snippet for HTMX requests; full page otherwise.
+        """
+        if self.request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
+        return super().render_to_response(context, **response_kwargs)
 
 
 class LearningAreaDetailsView(ListView):
