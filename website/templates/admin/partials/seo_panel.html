@@ -44,7 +44,7 @@
         Focus Keyword <span class="text-white/20 normal-case font-normal">(optional)</span>
     </label>
     <input type="text" x-model="focusKeyword" @input="updateScore()"
-           id="focusKeyword"
+           id="focusKeyword" name="focus_keyword" value="{{ form.focus_keyword.value|default:'' }}"
            placeholder="e.g. grade 7 mathematics notes"
            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition-all">
     <p class="text-xs text-white/30">Enter the main keyword this page should rank for.</p>
@@ -175,7 +175,7 @@ function seoPanel() {
   return {
     metaTitle: document.getElementById('id_meta_title')?.value || '',
     metaDesc: document.getElementById('id_meta_description')?.value || '',
-    focusKeyword: '',
+    focusKeyword: document.getElementById('focusKeyword')?.value || '',
     imagePreview: null,
     score: 0,
     scoreLabel: 'Not Set',

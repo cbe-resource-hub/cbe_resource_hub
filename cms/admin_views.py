@@ -18,7 +18,7 @@ class AdminPageCreateView(IsAdminMixin, CreateView):
     model = Page
     template_name = "admin/seo_form.html"
     fields = ["title", "slug", "content", "is_published",
-              "meta_title", "meta_description", "meta_keywords", "featured_image"]
+              "focus_keyword", "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:page_list")
 
     def get_context_data(self, **kwargs):
@@ -37,7 +37,7 @@ class AdminPageUpdateView(IsAdminMixin, UpdateView):
     model = Page
     template_name = "admin/seo_form.html"
     fields = ["title", "slug", "content", "is_published",
-              "meta_title", "meta_description", "meta_keywords", "featured_image"]
+              "focus_keyword", "meta_title", "meta_description", "meta_keywords", "featured_image"]
     success_url = reverse_lazy("management:page_list")
 
     def get_context_data(self, **kwargs):

@@ -343,7 +343,7 @@ class GradeDetailsView(ListView):
         self.grade = self.kwargs["grade"]
         return (
             ResourceItem.objects.filter(grade__slug=self.grade)
-            .select_related("grade", )
+            .select_related("grade", "grade__level")
         )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:

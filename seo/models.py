@@ -56,6 +56,12 @@ class SEOModel(models.Model):
         validators=[validate_image_file_magic],
         help_text="Featured image for this page"
     )
+    focus_keyword = models.CharField(
+        max_length=60,
+        blank=True,
+        default='',
+        help_text="Enter the main keyword this page should rank for."
+    )
     meta_title = models.CharField(
         max_length=60,
         blank=True,

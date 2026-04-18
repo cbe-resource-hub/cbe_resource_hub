@@ -15,6 +15,7 @@ class SEOAdminMixin:
             'classes': ('collapse',),
             'fields': (
                 'featured_image',
+                'focus_keyword',
                 'meta_title',
                 'meta_description',
                 'meta_keywords',

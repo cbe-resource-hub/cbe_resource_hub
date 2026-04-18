@@ -26,6 +26,13 @@
 {% block filter_title %}{{ learning_area.name }} Resources{% endblock %}
 {% block filter_meta_description_value %}{{ learning_area.meta_description }}{% endblock %}
 {% block filter_count %}{{ resources|length }}{% endblock %}
+{% block filter_parent %}
+    <a href="{% url 'resources:learning_areas_list' %}" class="hover:text-white transition-colors">
+        Learning Areas</a>
+    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+{% endblock filter_parent %}
 
 {% block other_filters %}
     <h2 class="text-xs font-bold uppercase tracking-wider text-white/30 mb-4">Other Education Levels</h2>
