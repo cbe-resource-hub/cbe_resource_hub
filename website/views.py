@@ -14,7 +14,7 @@ from django.views.generic import FormView, TemplateView
 
 from notifications.notifier import notify_contact_form
 from resources.models import EducationLevel, LearningArea, ResourceItem
-from resources.views import RESOURCE_TYPE_INFO
+
 from website.forms import ContactForm
 from website.models import Partner, ContactMessage
 
@@ -53,6 +53,7 @@ class HomePageView(TemplateView):
 
         # Resource type cards with icon, label, desc, count
         resource_type_cards = []
+        from resources.views import RESOURCE_TYPE_INFO
         for key, info in RESOURCE_TYPE_INFO.items():
             count = ResourceItem.objects.filter(resource_type=key, is_free=True).count()
             resource_type_cards.append({
