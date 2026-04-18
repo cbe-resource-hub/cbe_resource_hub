@@ -196,6 +196,7 @@ DATABASES = {
             **dict(parse_qsl(_db_url.query)),
             "connect_timeout": 5,
             "options": "-c search_path=public",
+            # "pool": True,
         },
         "CONN_MAX_AGE": 600,
     }
