@@ -42,7 +42,7 @@ urlpatterns = [
 ]
 
 # ── Development only (excludes testing environment)─────────────────────────────
-if not ("pytest" in sys.modules or "test" in sys.argv) or settings.DEBUG:
+if settings.DEBUG and not ("pytest" in sys.modules or "test" in sys.argv):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     import debug_toolbar  # noqa: PLC0415
