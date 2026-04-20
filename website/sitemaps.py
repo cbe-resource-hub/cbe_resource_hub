@@ -12,7 +12,8 @@ from django.db.models import Max
 from django.urls import reverse
 
 from cms.models import Page
-from resources.models import ResourceItem, Grade, LearningArea, EducationLevel
+from resources.cache import get_learning_areas, get_grades, get_education_levels
+from resources.models import ResourceItem
 from website.models import Partner
 
 
@@ -56,7 +57,7 @@ class ResourceSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return ResourceItem.objects.all().only("slug", "updated_at").order_by("-created_at")
+        return ResourceItem.objects.all()
 
     def location(self, obj):
         return reverse("resources:resource_detail", kwargs={"slug": obj.slug})
@@ -99,7 +100,7 @@ class GradeSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return Grade.objects.all()
+        return get_grades()
 
     def location(self, obj):
         return reverse("resources:grade_details", kwargs={"grade": obj.slug})
@@ -114,7 +115,7 @@ class LearningAreaSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return LearningArea.objects.all()
+        return get_learning_areas()
 
     def location(self, obj):
         return reverse("resources:learning_area_details", kwargs={"learning_area": obj.slug})
@@ -129,7 +130,7 @@ class EducationLevelSitemap(Sitemap):
     protocol = "https" if not settings.DEBUG else "http"
 
     def items(self):
-        return EducationLevel.objects.all()
+        return get_education_levels()
 
     def location(self, obj):
         return reverse("resources:education_level_details", kwargs={"education_level": obj.slug})
