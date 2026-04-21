@@ -103,7 +103,7 @@ class CustomUser(AbstractUser):
     )
     disable_email_notification: bool = models.BooleanField(
         default=False,
-        help_text="If True, the user will not be sent marketing email notifications, however transactional emails will be sent.",
+        help_text="If checked, you will not receive marketing emails, however transactional emails will still be sent.",
     )
 
     # ── User Preferences ──────────────────────────────────────────────────────
