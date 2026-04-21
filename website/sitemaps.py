@@ -103,7 +103,7 @@ class GradeSitemap(Sitemap):
         return get_grades()
 
     def location(self, obj):
-        return reverse("resources:grade_details", kwargs={"grade": obj.slug})
+        return reverse("resources:grade_details", kwargs={"slug": obj.slug})
 
     def lastmod(self, obj):
         return obj.updated_at
@@ -118,7 +118,7 @@ class LearningAreaSitemap(Sitemap):
         return get_learning_areas()
 
     def location(self, obj):
-        return reverse("resources:learning_area_details", kwargs={"learning_area": obj.slug})
+        return reverse("resources:learning_area_details", kwargs={"slug": obj.slug})
 
     def lastmod(self, obj):
         return obj.updated_at
@@ -133,7 +133,7 @@ class EducationLevelSitemap(Sitemap):
         return get_education_levels()
 
     def location(self, obj):
-        return reverse("resources:education_level_details", kwargs={"education_level": obj.slug})
+        return reverse("resources:education_level_details", kwargs={"slug": obj.slug})
 
     def lastmod(self, obj):
         return obj.updated_at
