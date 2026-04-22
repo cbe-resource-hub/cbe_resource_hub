@@ -197,7 +197,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ──────────────────────────────────────────────────────────────────────────────
 _redis_url: str = os.getenv("REDIS_URL")
 _redis_password: str = os.getenv("REDIS_PASSWORD")
-
+_redis_port: int = int(os.getenv("REDIS_PORT")) if os.getenv("REDIS_PORT") else None
+_redis_host: str = os.getenv("REDIS_HOST")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -571,9 +572,9 @@ AXES_RESET_ON_SUCCESS: bool = True
 # ──────────────────────────────────────────────────────────────────────────────
 RATELIMIT_BACKEND = "redis" if _redis_url else "cache"
 RATELIMIT_REDIS = {
-    "host": os.getenv("REDIS_HOST"),
-    "port": 6379,
-    "db": 4,
+    "host": _redis_host,
+    "port": _redis_port,
+    "db": 3,
     "password": _redis_password or None,
     "socket_timeout": 0.1,
     "socket_connect_timeout": 0.1,

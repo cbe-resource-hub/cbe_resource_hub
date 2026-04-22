@@ -66,6 +66,7 @@ jobs:
             -e DATABASE_URL=postgresql://testuser:testpassword@localhost:5432/testdb \
             -e REDIS_URL=redis://localhost:6379 \
             -e REDIS_HOST=localhost \
+            -e REDIS_PORT=6379 \
             -e REDIS_PASSWORD= \
             -e EMAIL_HOST=smtp.gmail.com \
             -e EMAIL_HOST_USER=test@example.com \

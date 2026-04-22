@@ -1,6 +1,7 @@
 # 📚 CBE Resource Hub
 
-> A high-performance, open-source educational CMS built for Kenya's Competency-Based Education (CBC) curriculum. Enables educators, vendors, and administrators to share, discover, and manage curriculum-aligned learning materials.
+> A high-performance, open-source educational CMS built for Kenya's Competency-Based Education (CBC) curriculum. Enables
+> educators, vendors, and administrators to share, discover, and manage curriculum-aligned learning materials.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.12-blue)](https://python.org)
@@ -11,7 +12,8 @@
 ## ✨ Features
 
 - **Multivendor Marketplace** — Educators can register as Content Creators and upload resources
-- **CBC Curriculum Aligned** — From Pre-Primary level through Senior School (Grade 12) level, all standard learning areas
+- **CBC Curriculum Aligned** — From Pre-Primary level through Senior School (Grade 12) level, all standard learning
+  areas
 - **Custom Admin Panel** — Fully branded management UI (no Django Admin dependency)
 - **Rich Text Editing** — TinyMCE (served locally, no CDN) for page and resource descriptions
 - **Secure Auth** — email-only login via `django-allauth` with Google OAuth support
@@ -23,13 +25,17 @@
 - **Built-in Rate Limiting** — `django-smart-ratelimit` + `django-axes` brute-force protection
 - **Performance** — Query profiling via Silk, async-ready with Django 6 ASGI
 - **Global Toast Notifications** — Alpine.js system auto-fires Django messages; also JS-dispatchable from any page
-- **Robust Notification System** — Async Celery-powered email delivery with retries, idempotency, and SMTP-safe rate limiting
+- **Robust Notification System** — Async Celery-powered email delivery with retries, idempotency, and SMTP-safe rate
+  limiting
 - **Notification Dashboard** — Visualize email history, delivery status, and manual retry triggers
 - **Dynamic Menus** — CMS-driven header & footer navigation, zero code changes needed
 - **Contact Page** — Full form with email delivery, honeypot anti-spam, and animated responsive UI
-- **Enhanced Homepage** — Live HTMX search bar with debounced suggestions dropdown, resource type card grid, compact level pills, tabbed recent/popular sections, animated intersection stats counter, and scroll-to-top FAB
-- **SEO Optimization** — Pre-configured Open Graph (OG), Twitter Cards, JSON-LD structured data, and dynamic meta descriptions across all public pages
-- **SEO Landing Pages** — Per resource-type detail pages (`/resources/type/<type>/`) with JSON-LD `CollectionPage` schema, breadcrumbs, pagination, and sidebar navigation
+- **Enhanced Homepage** — Live HTMX search bar with debounced suggestions dropdown, resource type card grid, compact
+  level pills, tabbed recent/popular sections, animated intersection stats counter, and scroll-to-top FAB
+- **SEO Optimization** — Pre-configured Open Graph (OG), Twitter Cards, JSON-LD structured data, and dynamic meta
+  descriptions across all public pages
+- **SEO Landing Pages** — Per resource-type detail pages (`/resources/type/<type>/`) with JSON-LD `CollectionPage`
+  schema, breadcrumbs, pagination, and sidebar navigation
 - **Sitemap & robots.txt** — Auto-generated `sitemap.xml` and configurable `robots.txt` for Search Console
 - **Custom Branding** — Fully integrated SVG logo support for high-DPI scaling across the platform and favicons
 
@@ -403,6 +409,7 @@ CLOUDFLARE_R2_PUBLIC_SECRET_KEY=
 REDIS_URL=redis://localhost:6379
 REDIS_HOST=localhost
 REDIS_PASSWORD=
+REDIS_PORT=6379
 
 # ACCOUNT_EMAIL_VERIFICATION: "none" | "optional" | "mandatory"
 ACCOUNT_EMAIL_VERIFICATION=optional
@@ -430,6 +437,18 @@ CACHE_TIMEOUT=2419200
 CONTACT_EMAIL=info@localhost
 CONTACT_PHONE=+254712345678
 
+# Dev env vars
+ENABLE_DEBUG_TOOLBAR=True
+ENABLE_SILK=False
+
+USE_SQLITE=False
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=pass
+POSTGRES_DB=cbe_resource_hub
+PGUSER=postgres
+
+
 ```
 
 ### 4. Apply migrations
@@ -437,19 +456,24 @@ CONTACT_PHONE=+254712345678
 ```bash
 uv run python manage.py migrate
 ```
+
 ### 5. Prepopulate some important default settings
 
 ```bash
 uv run python manage.py populate_site_settings
 
 ```
-This seeds settings idempotently like: site_name, contact_phone, contact_email, google_oauth_client_id, site_indexing, meta_description.
+
+This seeds settings idempotently like: site_name, contact_phone, contact_email, google_oauth_client_id, site_indexing,
+meta_description.
 Some of these need to come from the .env variables set above
 
 ### 6. Prepopulate Primary Header and Footer Menus and their menu items
+
 ```bash
 uv run python manage.py populate_menus
 ```
+
 ### 7. Seed the Kenyan CBC curriculum
 
 This is a one-time idempotent command. Safe to run multiple times.
@@ -459,6 +483,7 @@ uv run python manage.py prepopulate_cbe
 ```
 
 This seeds:
+
 - **5 Education Levels**: Pre-Primary, Lower Primary, Upper Primary, Junior School, Senior School
 - **14 Grades**: PP1–PP2, Grade 1–12
 - **30+ Learning Areas**: aligned to each education level per CBC 2026 framework
@@ -469,7 +494,8 @@ This seeds:
 uv run python manage.py createsuperuser
 ```
 
-> Enter your **email** when prompted (username is auto-generated). The `auto_set_admin_role` signal automatically promotesto `Role.ADMIN`.
+> Enter your **email** when prompted (username is auto-generated). The `auto_set_admin_role` signal automatically
+> promotesto `Role.ADMIN`.
 
 ### 7. Run the development server
 
@@ -484,7 +510,7 @@ Visit: http://localhost:8000
 ## 🔑 Key URLs
 
 | URL                              | Description                                                         |
-| -------------------------------- | ------------------------------------------------------------------- |
+|----------------------------------|---------------------------------------------------------------------|
 | `/`                              | Public homepage — live search, resource type cards, stats, partners |
 | `/resources/`                    | Searchable & filterable resource catalogue                          |
 | `/resources/type/<type>/`        | SEO-optimised resource type landing page                            |
@@ -509,13 +535,14 @@ Navigation menus are **100% database-driven** — no code changes needed.
 1. **Admin Panel → Menus → + Add Menu** — use one of the reserved slot names:
 
    | Menu Name        | Where it renders                   |
-   | ---------------- | ---------------------------------- |
+      | ---------------- | ---------------------------------- |
    | `primary_header` | Desktop & mobile header navigation |
    | `footer`         | Footer quick-links column          |
 
 2. **Admin Panel → Menu Items → + Add Menu Item** — fill in Title, URL, and Order
 
-3. **Dropdown support**: Set a parent item's URL to `#`, then point child items to it. The header auto-renders them as an animated dropdown.
+3. **Dropdown support**: Set a parent item's URL to `#`, then point child items to it. The header auto-renders them as
+   an animated dropdown.
 
 > Full examples and field reference: [docs/MENUS.md](./docs/MENUS.md)
 
@@ -523,16 +550,17 @@ Navigation menus are **100% database-driven** — no code changes needed.
 
 ## 🔔 Global Notification System
 
-All `django.contrib.messages` notifications automatically display as animated toast popups on every page — no extra template code needed.
+All `django.contrib.messages` notifications automatically display as animated toast popups on every page — no extra
+template code needed.
 
 **Trigger from JavaScript anywhere:**
 
 ```js
 window.dispatchEvent(new CustomEvent('notify', {
-  detail: {
-    type: 'success',   // 'success' | 'error' | 'warning' | 'info'
-    message: 'Done! Your changes have been saved.'
-  }
+    detail: {
+        type: 'success',   // 'success' | 'error' | 'warning' | 'info'
+        message: 'Done! Your changes have been saved.'
+    }
 }))
 ```
 
@@ -543,22 +571,26 @@ Toasts auto-dismiss after 5 seconds with an animated progress bar. Users can als
 ## 👤 User Roles
 
 | Role               | Permissions                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------- |
+|--------------------|---------------------------------------------------------------------------------------------|
 | **Standard User**  | Browse & download resources, manage favourites                                              |
 | **Vendor/Creator** | All of the above + upload and manage own resources                                          |
 | **Admin**          | Full management panel access: CRUD for users, pages, resources, menus, settings, curriculum |
 | **Superuser**      | All Admin permissions + Django internals access                                             |
 
-> **Security Note:** Users cannot self-promote to Admin. Only superusers or existing Admins can assign the Admin role via the management panel.
+> **Security Note:** Users cannot self-promote to Admin. Only superusers or existing Admins can assign the Admin role
+> via the management panel.
 
 ---
 
 ## 🛡 Authentication & Security
 
 ### Email-only Login
-All authentication uses **email** as the primary identifier. Usernames are auto-generated internally and never shown to users.
+
+All authentication uses **email** as the primary identifier. Usernames are auto-generated internally and never shown to
+users.
 
 ### Google OAuth Setup
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create an OAuth 2.0 Client ID (Web application)
 3. Set Authorized redirect URI: `http://localhost:8000/accounts/google/login/callback/`
@@ -572,31 +604,39 @@ All authentication uses **email** as the primary identifier. Usernames are auto-
    ```
 
 ### Force Password Change
+
 When an admin creates a new user through the management panel:
+
 - A secure 12-character password is auto-generated
 - The password is shown **once** in the success message (copy and share securely)
 - The `must_change_password` flag is set on the user account
-- The `ForcePasswordChangeMiddleware` intercepts all requests for that user and redirects them to `/account/password/change/` until they comply
+- The `ForcePasswordChangeMiddleware` intercepts all requests for that user and redirects them to
+  `/account/password/change/` until they comply
 
 ---
 
 ## 📁 File Storage
 
 ### Development
+
 Files are stored in the `media/` directory locally.
 
 ### Production (Cloudflare R2)
+
 Configure your R2 credentials in `.env`. The system uses two buckets:
+
 - **Private bucket** — for paid/restricted resources
 - **Public bucket** — for free resources (publicly accessible URLs)
 
 Set up R2 in the Cloudflare dashboard:
+
 1. Create two R2 buckets (e.g. `cbe-private` and `cbe-public`)
 2. Create an API token with R2 read/write permissions
 3. For the public bucket, enable "Public Access" in R2 settings
 4. Fill in all `CLOUDFLARE_R2_*` variables in `.env`
 
 ### Mock R2/S3 compatible storage in dev with Minio
+
 It's possible to use r2/s3 compatible storage in development by installing Minio with docker and creating the buckets
 
 to run minio locally run the following command
@@ -615,9 +655,10 @@ quay.io/minio/minio server /data --console-address ":9001"
 > visit minio webaddress on browser at http://localhost:9001
 
 Create the three buckets, by default they are all private to change one to public that exec into minio
-container and use `mc` to adjust policy 
+container and use `mc` to adjust policy
 
 ### Run an email server smtp on localhost to test email sending
+
 To test email sending locally and offline with an smpt server use mailpit
 
 ---
@@ -625,7 +666,7 @@ To test email sending locally and offline with an smpt server use mailpit
 ## 🎨 Frontend Stack
 
 | Technology                    | Purpose                                                   |
-| ----------------------------- | --------------------------------------------------------- |
+|-------------------------------|-----------------------------------------------------------|
 | **Tailwind CSS v4**           | Utility-first styling                                     |
 | **Alpine.js**                 | Reactive UI (modals, bulk actions, dropdowns)             |
 | **HTMX**                      | Server-driven interactivity (favourites, partial updates) |
@@ -666,7 +707,8 @@ uv run python manage.py test
 
 ### FileField / ImageField `.url` safety
 
-Django's `ImageField` and `FileField` raise `ValueError` if you call `.url` when no file is associated (even if the field is not `None`). Always guard with `.name`:
+Django's `ImageField` and `FileField` raise `ValueError` if you call `.url` when no file is associated (even if the
+field is not `None`). Always guard with `.name`:
 
 ```html
 {# ❌ Wrong — raises ValueError if field is empty #}
@@ -674,13 +716,14 @@ Django's `ImageField` and `FileField` raise `ValueError` if you call `.url` when
 
 {# ✅ Correct #}
 {% if resource.featured_image and resource.featured_image.name %}
-  {{ resource.featured_image.url }}
+{{ resource.featured_image.url }}
 {% endif %}
 ```
 
 ### HTMX live search
 
-The homepage search bar uses HTMX partial responses. The view returns `resources/partials/search_suggestions.html` (max 6 results) when `?suggestions=1` is in the query string:
+The homepage search bar uses HTMX partial responses. The view returns `resources/partials/search_suggestions.html` (max
+6 results) when `?suggestions=1` is in the query string:
 
 ```python
 # resources/views.py — ResourceListView
@@ -690,7 +733,9 @@ if self.request.GET.get('suggestions') == '1':
 
 ### Animated stats counter
 
-The stats section uses a vanilla `IntersectionObserver` (no Alpine plugin dependency) that dispatches a `animate-stats` CustomEvent on the section when it enters the viewport. Alpine listens with `@animate-stats.window` and runs the counter animation. This is more reliable than `x-intersect` because it doesn't depend on Alpine plugin loading order.
+The stats section uses a vanilla `IntersectionObserver` (no Alpine plugin dependency) that dispatches a `animate-stats`
+CustomEvent on the section when it enters the viewport. Alpine listens with `@animate-stats.window` and runs the counter
+animation. This is more reliable than `x-intersect` because it doesn't depend on Alpine plugin loading order.
 
 
 ---
@@ -698,6 +743,7 @@ The stats section uses a vanilla `IntersectionObserver` (no Alpine plugin depend
 ## 🏗 Production Deployment
 
 ### Environment
+
 1. Set `DEBUG=False` in `.env`
 2. Set `ALLOWED_HOSTS=yourdomain.com`
 3. Configure a proper `DATABASE_URL` (PostgreSQL)
@@ -705,6 +751,7 @@ The stats section uses a vanilla `IntersectionObserver` (no Alpine plugin depend
 5. Run `uv run python manage.py collectstatic`
 
 ### Recommended Stack
+
 - **Web server**: Nginx + Gunicorn (ASGI: uvicorn)
 - **Database**: PostgreSQL 16+
 - **Cache/Queue**: Redis
@@ -712,6 +759,7 @@ The stats section uses a vanilla `IntersectionObserver` (no Alpine plugin depend
 - **TLS**: Let's Encrypt via Certbot
 
 ### Example Gunicorn command
+
 ```bash
 gunicorn cbe_res_hub.asgi:application -k uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:8000
 ```
