@@ -201,7 +201,7 @@ _redis_password: str = os.getenv("REDIS_PASSWORD")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{_redis_url}/1",
+        "LOCATION": f"{_redis_url}/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "PASSWORD": _redis_password or None,
@@ -387,8 +387,8 @@ DEFAULT_FROM_EMAIL: str = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 # ──────────────────────────────────────────────────────────────────────────────
 # 12. CELERY
 # ──────────────────────────────────────────────────────────────────────────────
-CELERY_BROKER_URL: str = f"{_redis_url}/2"
-CELERY_RESULT_BACKEND: str = f"{_redis_url}/3"
+CELERY_BROKER_URL: str = f"{_redis_url}/1"
+CELERY_RESULT_BACKEND: str = f"{_redis_url}/2"
 CELERY_ACCEPT_CONTENT: list[str] = ["json"]
 CELERY_TASK_SERIALIZER: str = "json"
 CELERY_RESULT_SERIALIZER: str = "json"
