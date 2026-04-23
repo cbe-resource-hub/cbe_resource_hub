@@ -47,15 +47,15 @@
 {% endblock %}
 
 {% block content %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
         <!-- Breadcrumb -->
-        <nav class="flex items-center gap-2 text-xs text-white/40 mb-6" aria-label="Breadcrumb">
+        <nav class="flex items-center gap-2 text-xs text-white/40 mb-4" aria-label="Breadcrumb">
             <a href="/" class="hover:text-white transition-colors">Home</a>
             <span>/</span>
             <a href="{% url 'resources:list' %}" class="hover:text-white transition-colors">Resources</a>
             <span>/</span>
-            <span class="text-white/70 truncate max-w-50">{{ resource.title }}</span>
+            <span class="text-white/70 truncate">{{ resource.title }}</span>
         </nav>
 
         <div class="overflow-hidden">
@@ -116,7 +116,7 @@
                                 Download Resource
                             </button>
                         {% else %}
-                            <p class="text-white/60 leading-relaxed mb-8">No file available for download</p>
+                            <p class="text-white/60 leading-relaxed mb-4">No file available for download</p>
                         {% endif %}
                         <!-- Favorite Action (z-10 so it's clickable above the stretched link) -->
                         {% if user.is_authenticated %}
@@ -133,6 +133,7 @@
 
 
                 </div>
+
                 <article class="text-white/60 leading-relaxed mb-4">{{ resource.description|safe }}</article>
 
             </div>
