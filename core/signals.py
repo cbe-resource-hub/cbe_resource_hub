@@ -7,7 +7,7 @@ from core.utils import clear_object_cache
 
 
 @receiver([post_save, post_delete], sender=AcademicSession)
-def clear_academic_sessions_cache(sender, instance):
+def clear_academic_sessions_cache(sender, instance, **kwargs):
     cache_base_key = "resources:academic_sessions"
     cache.delete(cache_base_key)
 
@@ -18,12 +18,12 @@ def clear_academic_sessions_cache(sender, instance):
 
 
 @receiver([post_save, post_delete], sender=Term)
-def clear_academic_sessions_cache_on_term_change():
+def clear_academic_sessions_cache_on_term_change(sender, instance, **kwargs):
     cache_base_key = "resources:academic_sessions"
     cache.delete(cache_base_key)
 
 
 @receiver([post_save, post_delete], sender=Year)
-def clear_academic_sessions_cache_on_year_change():
+def clear_academic_sessions_cache_on_year_change(sender, instance, **kwargs):
     cache_base_key = "resources:academic_sessions"
     cache.delete(cache_base_key)
