@@ -19,9 +19,15 @@ class Term(TimeStampedModel, models.Model):
     def __str__(self):
         return f"Term {self.term_number}"
 
+    class Meta:
+        ordering = ['-term_number']
+
 
 class Year(models.Model):
-    year = models.PositiveSmallIntegerField(default=current_year, unique=True)
+    year = models.PositiveSmallIntegerField(
+        default=current_year, unique=True,
+        help_text="e.g., 2026"
+    )
 
     def __str__(self):
         return f"{self.year}"
@@ -30,9 +36,20 @@ class Year(models.Model):
         ordering = ['-year']
 
 
+class AcademicSessionManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super().get_queryset().select_related(
+                "current_year", "current_term"
+            )
+        )
+
+
 class AcademicSession(models.Model):
     current_year = models.ForeignKey(Year, on_delete=models.CASCADE, related_name='sessions')
     current_term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='sessions')
+
+    objects = AcademicSessionManager()
 
     class Meta:
         verbose_name = "Academic Session"
