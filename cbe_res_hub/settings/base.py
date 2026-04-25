@@ -438,7 +438,7 @@ LOGGING = {
             "propagate": False,
         },
         "django": {
-            "handlers": ["stdout", "stderr", "mail_admins"],
+            "handlers": ["stdout", "stderr"],
             "level": "INFO",
             "propagate": False,
         },

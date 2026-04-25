@@ -26,9 +26,7 @@ Sections:
 """
 
 import ast
-import logging
 import os
-import re
 import ssl
 import sys
 from datetime import timedelta
@@ -41,6 +39,7 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
+
 
 # --- Function to require env vars ----
 def require_env(name: str, default: str | None = None) -> str:
@@ -510,11 +509,6 @@ LOGGING = {
             "formatter": "verbose",
             "filters": ["require_debug_true"],
         },
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
-        }
     },
 
     "loggers": {
@@ -524,7 +518,7 @@ LOGGING = {
             "propagate": False,
         },
         "django": {
-            "handlers": ["stdout", "stderr", "mail_admins"],
+            "handlers": ["stdout", "stderr"],
             "level": "INFO",
             "propagate": False,
         },
@@ -809,7 +803,6 @@ CONTACT_EMAIL: str = str(contact_email_env_var) if contact_email_env_var else ""
 
 contact_phone_env_var = os.getenv("CONTACT_PHONE")
 CONTACT_PHONE: str = str(contact_phone_env_var) if contact_phone_env_var else ""
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Quick reference
