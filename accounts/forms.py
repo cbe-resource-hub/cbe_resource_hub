@@ -8,9 +8,6 @@ class ProfileForm(forms.ModelForm):
         model = CustomUser
         fields = ["first_name", "last_name", "phone_number", "disable_email_notification"]
         widgets = {
-            "first_name": forms.TextInput(attrs={"class": "form-input"}),
-            "last_name": forms.TextInput(attrs={"class": "form-input"}),
-            "phone_number": forms.TextInput(attrs={"class": "form-input"}),
             "disable_email_notification": forms.CheckboxInput(attrs={
                 "class": "w-4 h-4 text-brand-primary bg-white/5 border-white/10 rounded focus:ring-brand-primary \
                          hover:cursor-pointer focus:ring-2"}),
