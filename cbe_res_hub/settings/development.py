@@ -8,12 +8,7 @@ Inherits everything from base and applies:
   - Browser-cache-busting middleware
   - Elevated log level when DEBUG=True
 
-Do NOT import this directly in application code.
-Use ``from django.conf import settings`` as normal.
 """
-
-import ast
-import os
 
 from .base import *  # noqa: F401, F403
 from .base import (
@@ -79,4 +74,3 @@ if USE_SQLITE:
 # ── Logging ───────────────────────────────────────────────────────────────────
 if DEBUG:
     LOGGING["loggers"][""]["level"] = "DEBUG"
-    

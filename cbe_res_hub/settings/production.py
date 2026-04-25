@@ -7,9 +7,10 @@ Inherits everything from base and applies:
   - Page-level cache middleware
   - JSON logging (dev_console handler removed)
 
-Do NOT import this directly in application code.
-Use ``from django.conf import settings`` as normal.
 """
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *  # noqa: F401, F403
 from .base import (
@@ -71,4 +72,16 @@ if _private_r2 and _public_r2:
             "OPTIONS": _cf_settings.CLOUDFLARE_R2_BACKUP_CONFIG_OPTIONS,
         },
     }
-    
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SENTRY
+# ──────────────────────────────────────────────────────────────────────────────
+
+if os.getenv("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.getenv("SENTRY_DSN"),
+        integrations=[DjangoIntegration(), CeleryIntegration()],
+        traces_sample_rate=0.2,
+        send_default_pii=True,
+        environment=environment,
+    )

@@ -1,23 +1,16 @@
 """
 base.py — shared settings loaded by every environment.
-
-Do NOT import this directly in application code.
-Use ``from django.conf import settings`` as normal.
 """
 
 import ast
 import os
-import re
 import ssl
 import sys
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import parse_qsl, urlparse
 
-import sentry_sdk
 from dotenv import load_dotenv
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
 
@@ -526,19 +519,7 @@ RATELIMIT_MIDDLEWARE = {
 }
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 17. SENTRY
-# ──────────────────────────────────────────────────────────────────────────────
-if os.getenv("SENTRY_DSN"):
-    sentry_sdk.init(
-        dsn=os.getenv("SENTRY_DSN"),
-        integrations=[DjangoIntegration(), CeleryIntegration()],
-        traces_sample_rate=0.2,
-        send_default_pii=True,
-        environment=environment,
-    )
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 18. THIRD-PARTY APP SETTINGS
+# 17. THIRD-PARTY APP SETTINGS
 # ──────────────────────────────────────────────────────────────────────────────
 TINYMCE_DEFAULT_CONFIG = {
     "theme": "silver",
