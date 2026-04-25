@@ -60,9 +60,9 @@ class CustomUser(AbstractUser):
     """
 
     class Role(models.TextChoices):
-        ADMIN  = "admin",  "Admin"
+        ADMIN = "admin", "Admin"
         VENDOR = "vendor", "Vendor/Creator"
-        USER   = "user",   "Standard User"
+        USER = "user", "Standard User"
 
     objects = EmailUserManager()  # type: ignore[assignment]
 
@@ -114,19 +114,30 @@ class CustomUser(AbstractUser):
     )
 
     # Email is the login field
-    USERNAME_FIELD  = "email"
-    REQUIRED_FIELDS = []          # removes all extra prompts from `createsuperuser`
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []  # removes all extra prompts from `createsuperuser`
 
     class Meta:
-        verbose_name        = "User"
+        verbose_name = "User"
         verbose_name_plural = "Users"
-        ordering            = ["-date_joined"]
+        ordering = ["-date_joined"]
 
     def __str__(self) -> str:
         return self.get_full_name() or self.email
+
+    def save(self, *args, **kwargs):
+        
+        if self.role == CustomUser.Role.VENDOR and not self.is_vendor:
+            self.is_vendor = True
+        if self.is_vendor and not self.role == CustomUser.Role.VENDOR:
+            self.role = CustomUser.Role.VENDOR
+        if self.is_superuser and self.role != CustomUser.Role.ADMIN:
+            self.role = CustomUser.Role.ADMIN
+
+        super().save(*args, **kwargs)
 
     @property
     def is_content_vendor(self) -> bool:
         """True if the user is flagged as a vendor or has the vendor role."""
         return self.is_vendor or self.role == self.Role.VENDOR or \
-                self.is_superuser or self.role == self.Role.ADMIN
+            self.is_superuser or self.role == self.Role.ADMIN

@@ -18,10 +18,9 @@ from __future__ import annotations
 
 import logging
 
+from allauth.account.signals import password_changed
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-
-from allauth.account.signals import password_changed
 
 from accounts.adapters import _unique_username, _slugify_username
 
@@ -29,30 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender="accounts.CustomUser")
-def auto_set_admin_role(sender, instance, created: bool, **kwargs) -> None:
-    """
-    Automatically assign Role.ADMIN to any superuser account.
-
-    Runs silently on every save so it self-heals if someone manually
-    changes a superuser's role back.
-    """
-    from accounts.models import CustomUser
-
-    if instance.is_superuser and instance.role != CustomUser.Role.ADMIN:
-        # Use queryset update to avoid triggering this signal again
-        sender.objects.filter(pk=instance.pk).update(
-            role=CustomUser.Role.ADMIN
-        )
-        logger.info(
-            "auto_set_admin_role: set role=admin for %s",
-            instance.email,
-        )
-
-
-@receiver(post_save, sender="accounts.CustomUser")
-def ensure_superuser_email_verified(
-    sender, instance, created: bool, **kwargs
-) -> None:
+def ensure_superuser_email_verified(sender, instance, created: bool, **kwargs) -> None:
     """
     When a superuser is saved (created or updated), ensure allauth has a
     verified EmailAddress record for their email.
@@ -106,5 +82,5 @@ def reset_must_change_password(sender, request, user, **kwargs):
 
 @receiver(pre_save, sender="accounts.CustomUser")
 def generate_username_from_email(sender, instance, **kwargs):
-    if instance.email and ( not instance.username or instance.username == "" ):
+    if instance.email and (not instance.username or instance.username == ""):
         instance.username = _unique_username(_slugify_username(instance.email))
