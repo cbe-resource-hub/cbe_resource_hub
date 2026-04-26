@@ -67,6 +67,13 @@ class TestUserCreation(AccountsBaseTestcase):
         )
         self.assertEqual(self.user3.username, "janedoetag")
 
+    def test_derive_ascii_safe_from_email_with_unicode_characters(self):
+        self.user7 = CustomUser.objects.create_user(
+            email="unicode测试文件🎉@example.com",
+            password="password123",
+        )
+        self.assertEqual(self.user7.username, "unicode")
+
     def test_vendor_saved_with_vendor_role_has_the_is_vendor_toggled_on(self):
         self.user4 = CustomUser.objects.create_user(
             email="vendor2@gmail.com",
