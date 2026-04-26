@@ -155,7 +155,6 @@ dependencies = [
     { name = "attrs" },
     { name = "autobahn" },
     { name = "automat" },
-    { name = "autopep8" },
     { name = "billiard" },
     { name = "boolean-py" },
     { name = "boto3" },
@@ -165,8 +164,6 @@ dependencies = [
     { name = "celery" },
     { name = "certifi" },
     { name = "cffi" },
-    { name = "channels" },
-    { name = "channels-redis" },
     { name = "charset-normalizer" },
     { name = "click" },
     { name = "click-didyoumean" },
@@ -175,8 +172,6 @@ dependencies = [
     { name = "constantly" },
     { name = "cron-descriptor" },
     { name = "cryptography" },
-    { name = "cyclonedx-python-lib" },
-    { name = "daphne" },
     { name = "defusedxml" },
     { name = "django" },
     { name = "django-allauth" },
@@ -186,10 +181,8 @@ dependencies = [
     { name = "django-celery-results" },
     { name = "django-cors-headers" },
     { name = "django-dbbackup" },
-    { name = "django-debug-toolbar" },
     { name = "django-phonenumber-field" },
     { name = "django-redis" },
-    { name = "django-silk", extra = ["formatting"] },
     { name = "django-smart-ratelimit" },
     { name = "django-storages", extra = ["s3"] },
     { name = "django-taggit" },
@@ -197,16 +190,13 @@ dependencies = [
     { name = "django-tinymce" },
     { name = "django-widget-tweaks" },
     { name = "filelock" },
-    { name = "gprof2dot" },
     { name = "gunicorn" },
     { name = "hiredis" },
     { name = "hyperlink" },
     { name = "idna" },
     { name = "incremental" },
-    { name = "iniconfig" },
     { name = "jmespath" },
     { name = "kombu" },
-    { name = "license-expression" },
     { name = "markdown-it-py" },
     { name = "mdurl" },
     { name = "msgpack" },
@@ -214,26 +204,17 @@ dependencies = [
     { name = "packaging" },
     { name = "phonenumbers" },
     { name = "pillow" },
-    { name = "pip-api" },
-    { name = "pip-audit" },
-    { name = "pip-requirements-parser" },
     { name = "platformdirs" },
-    { name = "pluggy" },
     { name = "prompt-toolkit" },
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg-binary" },
-    { name = "py-serializable" },
-    { name = "py-ubjson" },
     { name = "pyasn1" },
     { name = "pyasn1-modules" },
-    { name = "pycodestyle" },
     { name = "pycparser" },
     { name = "pygments" },
     { name = "pyjwt" },
     { name = "pyopenssl" },
     { name = "pyparsing" },
-    { name = "pytest" },
-    { name = "pytest-django" },
     { name = "python-crontab" },
     { name = "python-dateutil" },
     { name = "python-dotenv" },
@@ -264,6 +245,26 @@ dependencies = [
     { name = "zope-interface" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "autopep8" },
+    { name = "cyclonedx-python-lib" },
+    { name = "django-debug-toolbar" },
+    { name = "django-silk", extra = ["formatting"] },
+    { name = "gprof2dot" },
+    { name = "iniconfig" },
+    { name = "license-expression" },
+    { name = "pip-api" },
+    { name = "pip-audit" },
+    { name = "pip-requirements-parser" },
+    { name = "pluggy" },
+    { name = "py-serializable" },
+    { name = "py-ubjson" },
+    { name = "pycodestyle" },
+    { name = "pytest" },
+    { name = "pytest-django" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "amqp", specifier = "==5.3.1" },
@@ -271,7 +272,6 @@ requires-dist = [
     { name = "attrs", specifier = "==26.1.0" },
     { name = "autobahn", specifier = "==25.12.2" },
     { name = "automat", specifier = "==25.4.16" },
-    { name = "autopep8", specifier = "==2.3.2" },
     { name = "billiard", specifier = "==4.2.4" },
     { name = "boolean-py", specifier = "==5.0" },
     { name = "boto3", specifier = "==1.42.83" },
@@ -281,8 +281,6 @@ requires-dist = [
     { name = "celery", specifier = "==5.6.3" },
     { name = "certifi", specifier = "==2026.2.25" },
     { name = "cffi", specifier = "==2.0.0" },
-    { name = "channels", specifier = "==4.3.2" },
-    { name = "channels-redis", specifier = "==4.3.0" },
     { name = "charset-normalizer", specifier = "==3.4.7" },
     { name = "click", specifier = "==8.3.2" },
     { name = "click-didyoumean", specifier = "==0.3.1" },
@@ -291,8 +289,6 @@ requires-dist = [
     { name = "constantly", specifier = "==23.10.4" },
     { name = "cron-descriptor", specifier = "==1.4.5" },
     { name = "cryptography", specifier = "==46.0.7" },
-    { name = "cyclonedx-python-lib", specifier = "==11.7.0" },
-    { name = "daphne", specifier = "==4.2.1" },
     { name = "defusedxml", specifier = "==0.7.1" },
     { name = "django", specifier = "==6.0.4" },
     { name = "django-allauth", specifier = "==65.15.1" },
@@ -302,10 +298,8 @@ requires-dist = [
     { name = "django-celery-results", specifier = "==2.6.0" },
     { name = "django-cors-headers", specifier = "==4.9.0" },
     { name = "django-dbbackup", specifier = "==5.2.0" },
-    { name = "django-debug-toolbar", specifier = "==6.3.0" },
     { name = "django-phonenumber-field", specifier = "==8.4.0" },
     { name = "django-redis", specifier = "==6.0.0" },
-    { name = "django-silk", extras = ["formatting"], specifier = "==5.5.0" },
     { name = "django-smart-ratelimit", specifier = "==2.2.0" },
     { name = "django-storages", extras = ["s3"], specifier = "==1.14.6" },
     { name = "django-taggit", specifier = "==6.1.0" },
@@ -313,16 +307,13 @@ requires-dist = [
     { name = "django-tinymce", specifier = "==5.0.0" },
     { name = "django-widget-tweaks", specifier = "==1.5.1" },
     { name = "filelock", specifier = "==3.25.2" },
-    { name = "gprof2dot", specifier = "==2025.4.14" },
     { name = "gunicorn", specifier = "==25.3.0" },
     { name = "hiredis", specifier = "==3.3.1" },
     { name = "hyperlink", specifier = "==21.0.0" },
     { name = "idna", specifier = "==3.11" },
     { name = "incremental", specifier = "==24.11.0" },
-    { name = "iniconfig", specifier = "==2.3.0" },
     { name = "jmespath", specifier = "==1.1.0" },
     { name = "kombu", specifier = "==5.6.2" },
-    { name = "license-expression", specifier = "==30.4.4" },
     { name = "markdown-it-py", specifier = "==4.0.0" },
     { name = "mdurl", specifier = "==0.1.2" },
     { name = "msgpack", specifier = "==1.1.2" },
@@ -330,26 +321,17 @@ requires-dist = [
     { name = "packaging", specifier = "==26.0" },
     { name = "phonenumbers", specifier = "==9.0.27" },
     { name = "pillow", specifier = "==12.2.0" },
-    { name = "pip-api", specifier = "==0.0.34" },
-    { name = "pip-audit", specifier = "==2.10.0" },
-    { name = "pip-requirements-parser", specifier = "==32.0.1" },
     { name = "platformdirs", specifier = "==4.9.4" },
-    { name = "pluggy", specifier = "==1.6.0" },
     { name = "prompt-toolkit", specifier = "==3.0.52" },
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.3" },
     { name = "psycopg-binary", specifier = "==3.3.3" },
-    { name = "py-serializable", specifier = "==2.1.0" },
-    { name = "py-ubjson", specifier = "==0.16.1" },
     { name = "pyasn1", specifier = "==0.6.3" },
     { name = "pyasn1-modules", specifier = "==0.4.2" },
-    { name = "pycodestyle", specifier = "==2.14.0" },
     { name = "pycparser", specifier = "==3.0" },
     { name = "pygments", specifier = "==2.20.0" },
     { name = "pyjwt", specifier = "==2.12.1" },
     { name = "pyopenssl", specifier = "==26.0.0" },
     { name = "pyparsing", specifier = "==3.3.2" },
-    { name = "pytest", specifier = "==9.0.3" },
-    { name = "pytest-django", specifier = "==4.12.0" },
     { name = "python-crontab", specifier = "==3.3.0" },
     { name = "python-dateutil", specifier = "==2.9.0.post0" },
     { name = "python-dotenv", specifier = "==1.2.2" },
@@ -378,6 +360,26 @@ requires-dist = [
     { name = "vine", specifier = "==5.1.0" },
     { name = "wcwidth", specifier = "==0.6.0" },
     { name = "zope-interface", specifier = "==8.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "autopep8", specifier = "==2.3.2" },
+    { name = "cyclonedx-python-lib", specifier = "==11.7.0" },
+    { name = "django-debug-toolbar", specifier = "==6.3.0" },
+    { name = "django-silk", extras = ["formatting"], specifier = "==5.5.0" },
+    { name = "gprof2dot", specifier = "==2025.4.14" },
+    { name = "iniconfig", specifier = "==2.3.0" },
+    { name = "license-expression", specifier = "==30.4.4" },
+    { name = "pip-api", specifier = "==0.0.34" },
+    { name = "pip-audit", specifier = "==2.10.0" },
+    { name = "pip-requirements-parser", specifier = "==32.0.1" },
+    { name = "pluggy", specifier = "==1.6.0" },
+    { name = "py-serializable", specifier = "==2.1.0" },
+    { name = "py-ubjson", specifier = "==0.16.1" },
+    { name = "pycodestyle", specifier = "==2.14.0" },
+    { name = "pytest", specifier = "==9.0.3" },
+    { name = "pytest-django", specifier = "==4.12.0" },
 ]
 
 [[package]]
@@ -494,34 +496,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/1d/ec1a60bd1a10daa292d3cd6bb0b359a81607154fb8165f3ec95fe003b85c/cffi-2.0.0-cp314-cp314t-win32.whl", hash = "sha256:1fc9ea04857caf665289b7a75923f2c6ed559b8298a1b8c49e59f7dd95c8481e", size = 180487, upload-time = "2025-09-08T23:23:40.423Z" },
     { url = "https://files.pythonhosted.org/packages/bf/41/4c1168c74fac325c0c8156f04b6749c8b6a8f405bbf91413ba088359f60d/cffi-2.0.0-cp314-cp314t-win_amd64.whl", hash = "sha256:d68b6cef7827e8641e8ef16f4494edda8b36104d79773a334beaa1e3521430f6", size = 191726, upload-time = "2025-09-08T23:23:41.742Z" },
     { url = "https://files.pythonhosted.org/packages/ae/3a/dbeec9d1ee0844c679f6bb5d6ad4e9f198b1224f4e7a32825f47f6192b0c/cffi-2.0.0-cp314-cp314t-win_arm64.whl", hash = "sha256:0a1527a803f0a659de1af2e1fd700213caba79377e27e4693648c2923da066f9", size = 184195, upload-time = "2025-09-08T23:23:43.004Z" },
-]
-
-[[package]]
-name = "channels"
-version = "4.3.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "asgiref" },
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/74/92/b18d4bb54d14986a8b35215a1c9e6a7f9f4d57ca63ac9aee8290ebb4957d/channels-4.3.2.tar.gz", hash = "sha256:f2bb6bfb73ad7fb4705041d07613c7b4e69528f01ef8cb9fb6c21d9295f15667", size = 27023, upload-time = "2025-11-20T15:13:05.102Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/16/34/c32915288b7ef482377b6adc401192f98c6a99b3a145423d3b8aed807898/channels-4.3.2-py3-none-any.whl", hash = "sha256:fef47e9055a603900cf16cef85f050d522d9ac4b3daccf24835bd9580705c176", size = 31313, upload-time = "2025-11-20T15:13:02.357Z" },
-]
-
-[[package]]
-name = "channels-redis"
-version = "4.3.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "asgiref" },
-    { name = "channels" },
-    { name = "msgpack" },
-    { name = "redis" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/69/fd3407ad407a80e72ca53850eb7a4c306273e67d5bbb71a86d0e6d088439/channels_redis-4.3.0.tar.gz", hash = "sha256:740ee7b54f0e28cf2264a940a24453d3f00526a96931f911fcb69228ef245dd2", size = 31440, upload-time = "2025-07-22T13:48:46.087Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/fe/b7224a401ad227b263e5ba84753ffb5a88df048f3b15efd2797903543ce4/channels_redis-4.3.0-py3-none-any.whl", hash = "sha256:48f3e902ae2d5fef7080215524f3b4a1d3cea4e304150678f867a1a822c0d9f5", size = 20641, upload-time = "2025-07-22T13:48:44.545Z" },
 ]
 
 [[package]]
@@ -740,20 +714,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/21/0d/64f02d3fd9c116d6f50a540d04d1e4f2e3c487f5062d2db53733ddb25917/cyclonedx_python_lib-11.7.0.tar.gz", hash = "sha256:fb1bc3dedfa31208444dbd743007f478ab6984010a184e5bd466bffd969e936e", size = 1411174, upload-time = "2026-03-17T15:19:16.606Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/30/09/fe0e3bc32bd33707c519b102fc064ad2a2ce5a1b53e2be38b86936b476b1/cyclonedx_python_lib-11.7.0-py3-none-any.whl", hash = "sha256:02fa4f15ddbba21ac9093039f8137c0d1813af7fe88b760c5dcd3311a8da2178", size = 513041, upload-time = "2026-03-17T15:19:14.369Z" },
-]
-
-[[package]]
-name = "daphne"
-version = "4.2.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "asgiref" },
-    { name = "autobahn" },
-    { name = "twisted", extra = ["tls"] },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/9d/322b605fdc03b963cf2d33943321c8f4405e8d82e698bf49d1eed1ca40c4/daphne-4.2.1.tar.gz", hash = "sha256:5f898e700a1fda7addf1541d7c328606415e96a7bd768405f0463c312fcb31b3", size = 45600, upload-time = "2025-07-02T12:57:04.935Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/01/34/6171ab34715ed210bcd6c2b38839cc792993cff4fe2493f50bc92b0086a0/daphne-4.2.1-py3-none-any.whl", hash = "sha256:881e96b387b95b35ad85acd855f229d7f5b79073d6649089c8a33f661885e055", size = 29015, upload-time = "2025-07-02T12:57:03.793Z" },
 ]
 
 [[package]]
@@ -1879,13 +1839,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/13/0f/82716ed849bf7ea4984c21385597c949944f0f9b428b5710f79d0afc084d/twisted-25.5.0.tar.gz", hash = "sha256:1deb272358cb6be1e3e8fc6f9c8b36f78eb0fa7c2233d2dbe11ec6fee04ea316", size = 3545725, upload-time = "2025-06-07T09:52:24.858Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/eb/66/ab7efd8941f0bc7b2bd555b0f0471bff77df4c88e0cc31120c82737fec77/twisted-25.5.0-py3-none-any.whl", hash = "sha256:8559f654d01a54a8c3efe66d533d43f383531ebf8d81d9f9ab4769d91ca15df7", size = 3204767, upload-time = "2025-06-07T09:52:21.428Z" },
-]
-
-[package.optional-dependencies]
-tls = [
-    { name = "idna" },
-    { name = "pyopenssl" },
-    { name = "service-identity" },
 ]
 
 [[package]]

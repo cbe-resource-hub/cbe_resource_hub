@@ -6,8 +6,8 @@ FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 
@@ -27,9 +27,19 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean && \
         postgresql-client-17 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN pip install --prefix=/install -r requirements.txt
+# Install deps only — bind-mount keeps lockfile out of the image layer
+# This layer is cached until uv.lock or pyproject.toml changes
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-dev
+
+# Copy source and install the project itself
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-dev
 
 
 ########## FINAL IMAGE ##########
@@ -39,9 +49,9 @@ LABEL org.opencontainers.image.authors="paulmbui20" \
       org.opencontainers.image.source="https://github.com/paulmbui20/cbe_resource_hub.git"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH="/app/.venv/bin:$PATH"
 
-# Install runtime dependencies with PostgreSQL 17 client from official repo
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         curl \
@@ -58,14 +68,11 @@ RUN apt-get update && \
 
 RUN adduser --disabled-password --gecos "" --uid 10001 appuser
 
-COPY --from=builder --chown=appuser:appuser /install /usr/local
-
 WORKDIR /app
 
-RUN mkdir -p static && \
-    chown -R appuser:appuser /app static
+RUN mkdir -p static && chown -R appuser:appuser /app
 
-COPY --chown=appuser:appuser . .
+COPY --from=builder --chown=appuser:appuser /app /app
 
 RUN chmod +x docker-health-check.py build.sh 2>/dev/null || true
 

@@ -1,18 +1,15 @@
+# syntax=docker/dockerfile:1
 ARG PYTHON_VERSION=3.12
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS test
 
-ARG PYTHON_VERSION
-
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    UV_LINK_MODE=copy \
+    PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-# System deps (curl useful for debugging inside container)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
@@ -22,18 +19,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-COPY ../requirements.txt .
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Deps cached separately from source — only invalidated when lockfile changes
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
 
+COPY . .
 
-# Copy application code into test image
-COPY .. .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
 
 RUN chmod +x test/test.sh
 
-# Default command
 CMD ["./test/test.sh"]
