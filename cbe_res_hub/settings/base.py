@@ -8,7 +8,6 @@ import ssl
 import sys
 from datetime import timedelta
 from pathlib import Path
-from urllib.parse import parse_qsl, urlparse
 
 from dotenv import load_dotenv
 
@@ -28,6 +27,7 @@ def require_env(name: str, default: str | None = None) -> str:
 # ── Resolve environment ────────────────────────────────────────────────────────
 environment: str = require_env("ENVIRONMENT")
 _prod: bool = environment == "production"
+_testing: bool = environment == "testing"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 1. CORE / SECURITY
@@ -38,8 +38,8 @@ SECRET_KEY: str = require_env("SECRET_KEY")
 
 debug_env = os.getenv("DEBUG", "False")
 DEBUG: bool = ast.literal_eval(debug_env) if debug_env else False
-if _prod and DEBUG:
-    raise RuntimeError("DEBUG must be False in production")
+if (_prod or _testing) and DEBUG:
+    raise RuntimeError("DEBUG must be False in production and testing environments")
 
 allowed_hosts = require_env("ALLOWED_HOSTS")
 ALLOWED_HOSTS: list[str] = [h.strip() for h in allowed_hosts.split(",") if h.strip()]
@@ -140,30 +140,6 @@ TEMPLATES = [
         },
     },
 ]
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 5. DATABASE  (PostgreSQL via DATABASE_URL)
-# ──────────────────────────────────────────────────────────────────────────────
-_db_url = urlparse(
-    os.getenv("DATABASE_URL") if _prod else os.getenv("DATABASE_URL_LOCAL")
-)
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": _db_url.path.lstrip("/"),
-        "USER": _db_url.username,
-        "PASSWORD": _db_url.password,
-        "HOST": _db_url.hostname,
-        "PORT": _db_url.port,
-        "OPTIONS": {
-            **dict(parse_qsl(_db_url.query)),
-            "connect_timeout": 5,
-            "options": "-c search_path=public",
-        },
-        "CONN_MAX_AGE": 600,
-    }
-}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -538,18 +514,6 @@ TINYMCE_DEFAULT_CONFIG = {
 }
 TINYMCE_COMPRESSOR: bool = False
 TAGGIT_CASE_INSENSITIVE: bool = True
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 19. DATABASE BACKUPS
-# ──────────────────────────────────────────────────────────────────────────────
-DBBACKUP_CLEANUP_KEEP: int = 14
-DBBACKUP_CLEANUP_KEEP_MEDIA: int = 0
-DBBACKUP_CONNECTORS = {
-    "default": {"CONNECTOR": "dbbackup.db.postgresql.PgDumpConnector"}
-}
-DBBACKUP_FILENAME_TEMPLATE = "{databasename}-{datetime}.{extension}"
-DBBACKUP_DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
-DBBACKUP_DATABASES = ["default"]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 20. MISC / SITE IDENTITY

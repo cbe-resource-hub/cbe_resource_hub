@@ -24,20 +24,6 @@ echo "   - PostgreSQL"
 echo "   - Redis"
 sleep 5
 
-# Check database connectivity
-echo -e "${BLUE}🔍 Checking database connectivity...${NC}"
-python -c "
-import sys
-import psycopg2
-try:
-    conn = psycopg2.connect('$DATABASE_URL')
-    conn.close()
-    print('   ✓ Main database connected')
-except Exception as e:
-    print(f'   ✗ Main database connection failed: {e}')
-    sys.exit(1)
-"
-
 # Apply migrations
 echo -e "${BLUE}📦 Applying migrations...${NC}"
 python manage.py migrate --noinput

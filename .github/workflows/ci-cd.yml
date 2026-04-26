@@ -18,19 +18,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:17.5-alpine
-        env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U testuser -d testdb"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-
       redis:
         image: redis:8-alpine
         ports: ["6379:6379"]
@@ -58,12 +45,11 @@ jobs:
         run: |
           docker run --rm \
             --network="host" \
-            -e ENVIRONMENT=production \
+            -e ENVIRONMENT=testing \
             -e DEBUG=False \
             -e SECRET_KEY=Uf96gCcdjM5dG0D8tFvgrGRnsRwT1UxKmyqGIM6DffZsncN16TvoGvXtHDLyh1XQ_3tCdgc1NrBL6BGv4hT5hw \
             -e ALLOWED_HOSTS=localhost,127.0.0.1 \
             -e CSRF_ORIGINS=http://localhost:8000,http://127.0.0.1:8000 \
-            -e DATABASE_URL=postgresql://testuser:testpassword@localhost:5432/testdb \
             -e REDIS_URL=redis://localhost:6379 \
             -e REDIS_HOST=localhost \
             -e REDIS_PORT=6379 \

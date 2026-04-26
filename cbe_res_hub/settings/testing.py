@@ -9,7 +9,16 @@ Inherits base, then:
 """
 
 from .base import *  # noqa: F401, F403
-from .base import DEFAULT_APPS, MAIN_MIDDLEWARE, MY_APPS, THIRD_PARTY_APPS
+
+DEBUG = False
+
+# ── Default to SQLITE for testing ─────────────────────────────────────
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 # ── Rate limiting: non-blocking in tests ─────────────────────────────────────
 RATELIMIT_MIDDLEWARE = {

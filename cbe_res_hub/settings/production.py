@@ -8,6 +8,8 @@ Inherits everything from base and applies:
   - JSON logging (dev_console handler removed)
 
 """
+from urllib.parse import urlparse, parse_qsl
+
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -21,6 +23,30 @@ from .base import (
     _public_r2,
     _backup_r2,
 )
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DATABASE  (PostgreSQL via DATABASE_URL)
+# ──────────────────────────────────────────────────────────────────────────────
+_db_url = urlparse(
+    require_env("DATABASE_URL")
+)
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _db_url.path.lstrip("/"),
+        "USER": _db_url.username,
+        "PASSWORD": _db_url.password,
+        "HOST": _db_url.hostname,
+        "PORT": _db_url.port,
+        "OPTIONS": {
+            **dict(parse_qsl(_db_url.query)),
+            "connect_timeout": 5,
+            "options": "-c search_path=public",
+        },
+        "CONN_MAX_AGE": 600,
+    }
+}
 
 # ── Security hardening ────────────────────────────────────────────────────────
 SESSION_COOKIE_SECURE = True
@@ -73,6 +99,18 @@ if _private_r2 and _public_r2 and _backup_r2:
             "OPTIONS": _cf_settings.CLOUDFLARE_R2_BACKUP_CONFIG_OPTIONS,
         },
     }
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DATABASE BACKUPS
+# ──────────────────────────────────────────────────────────────────────────────
+DBBACKUP_CLEANUP_KEEP: int = 14
+DBBACKUP_CLEANUP_KEEP_MEDIA: int = 0
+DBBACKUP_CONNECTORS = {
+    "default": {"CONNECTOR": "dbbackup.db.postgresql.PgDumpConnector"}
+}
+DBBACKUP_FILENAME_TEMPLATE = "{databasename}-{datetime}.{extension}"
+DBBACKUP_DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
+DBBACKUP_DATABASES = ["default"]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # SENTRY

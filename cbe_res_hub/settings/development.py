@@ -9,6 +9,7 @@ Inherits everything from base and applies:
   - Elevated log level when DEBUG=True
 
 """
+from urllib.parse import urlparse, parse_qsl
 
 from .base import *  # noqa: F401, F403
 from .base import (
@@ -68,6 +69,30 @@ if USE_SQLITE:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    # ──────────────────────────────────────────────────────────────────────────────
+    # DATABASE  (PostgreSQL via DATABASE_URL_LOCAL)
+    # ──────────────────────────────────────────────────────────────────────────────
+    _db_url = urlparse(
+        require_env("DATABASE_URL_LOCAL")
+    )
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": _db_url.path.lstrip("/"),
+            "USER": _db_url.username,
+            "PASSWORD": _db_url.password,
+            "HOST": _db_url.hostname,
+            "PORT": _db_url.port,
+            "OPTIONS": {
+                **dict(parse_qsl(_db_url.query)),
+                "connect_timeout": 5,
+                "options": "-c search_path=public",
+            },
+            "CONN_MAX_AGE": 600,
         }
     }
 
