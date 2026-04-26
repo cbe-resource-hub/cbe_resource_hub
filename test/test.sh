@@ -20,7 +20,6 @@ PARALLEL_JOBS=${TEST_PARALLEL_JOBS:-4}
 
 # Wait for services
 echo -e "${BLUE}⏳ Waiting for services...${NC}"
-echo "   - PostgreSQL"
 echo "   - Redis"
 sleep 5
 
@@ -46,8 +45,8 @@ echo "======================================"
 echo -e "${BLUE}Running pytest in parallel...${NC}"
 pytest \
   --verbose \
-  --tb=short \
-  -n ${PARALLEL_JOBS}
+  --tb=short #\
+#  -n ${PARALLEL_JOBS}
 
 TEST_EXIT_CODE=$?
 

@@ -8,7 +8,6 @@ requires-python = ">=3.12"
 dependencies = [
     # ── Django core ───────────────────────────────────────────────────────────
     "django==6.0.4",
-    # ── ASGI / Channels ───────────────────────────────────────────────────────
     # ── Database ──────────────────────────────────────────────────────────────
     "psycopg[binary]==3.3.3",
     # ── Cache / Redis ─────────────────────────────────────────────────────────
@@ -144,4 +143,5 @@ dev = [
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "cbe_res_hub.settings"
 python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-p no:cacheprovider --verbose --tb=short --color=yes --code-highlight=yes"
 # addopts = "--reuse-db --nomigrations -p no:warnings"
