@@ -1,3 +1,7 @@
+from .test_adapters import (
+    SlugifyUsernameTests, UniqueUsernameTests, AccountAdapterPopulateUsernameTests,
+    AccountAdapterSaveUserTests, SocialAccountAdapterPreSocialLoginTests, SocialAccountAdapterPopulateUserTests,
+)
 from .test_admin_views import (
     IsAdminMixinTests, AdminUserListViewTests, AdminUserCreateViewTests, AdminUserUpdateViewTests,
     AdminUserDeleteViewTests, AdminUserBulkToggleViewTests
@@ -26,4 +30,10 @@ __all__ = [
     "EnsureSuperuserEmailVerifiedTests",
     "ResetMustChangePasswordTests",
     "GenerateUsernameFromEmailTests",
+    "SlugifyUsernameTests",
+    "UniqueUsernameTests",
+    "AccountAdapterPopulateUsernameTests",
+    "AccountAdapterSaveUserTests",
+    "SocialAccountAdapterPreSocialLoginTests",
+    "SocialAccountAdapterPopulateUserTests",
 ]
