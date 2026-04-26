@@ -65,6 +65,9 @@ class BecomeVendorView(LoginRequiredMixin, View):
     Allows a standard user to become a vendor.
     Only users with role == USER can upgrade themselves to VENDOR.
     """
+    http_method_names = [
+        'post',
+    ]
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -73,7 +76,7 @@ class BecomeVendorView(LoginRequiredMixin, View):
             user.is_vendor = True
             user.save(update_fields=["role", "is_vendor"])
             messages.success(request, "You are now a Content Creator! You can start uploading resources.")
-        elif user.role == CustomUser.Role.ADMIN or user.is_superuser:
+        elif user.role == CustomUser.Role.ADMIN or user.is_superuser or user.is_staff:
             messages.warning(request, "Admins inherently have creator privileges.")
         else:
             messages.info(request, "You are already a Content Creator.")
