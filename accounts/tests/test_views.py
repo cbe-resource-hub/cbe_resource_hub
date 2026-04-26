@@ -100,3 +100,68 @@ class AccountsBecomeVendorViewTests(AccountsBaseTestcase):
         self.assertEqual(self.vendor.role, CustomUser.Role.VENDOR)
         self.assertEqual(self.vendor.is_vendor, True)
         self.assertEqual(self.vendor.is_content_vendor, True)
+
+
+class AccountsDashboardViewTests(AccountsBaseTestcase):
+
+    def test_anonymous_user_is_redirected_to_login(self):
+        response = self.client.get(reverse("accounts:dashboard"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f"{getattr(settings, 'LOGIN_URL')}", response.url)
+
+    def test_logged_in_user_can_access_dashboard(self):
+        self.login_as_user()
+        response = self.client.get(reverse("accounts:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTemplateUsed(response, "accounts/dashboard.html")
+
+        self.assertIn("user", response.context)
+        self.assertIn("my_resources", response.context)
+        self.assertIn("my_resource_count", response.context)
+        self.assertIn("my_favorites", response.context)
+        self.assertIn("my_favorites_count", response.context)
+        self.assertIn("email_verified", response.context)
+
+        self.assertEqual(response.context["user"].role, CustomUser.Role.USER)
+
+        self.assertEqual(response.context["email_verified"], False)
+
+    def test_logged_in_admin_can_access_dashboard(self):
+        self.login_as_admin()
+        response = self.client.get(reverse("accounts:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTemplateUsed(response, "accounts/dashboard.html")
+
+        self.assertIn("user", response.context)
+        self.assertIn("my_resources", response.context)
+        self.assertIn("my_resource_count", response.context)
+        self.assertIn("my_favorites", response.context)
+        self.assertIn("my_favorites_count", response.context)
+        self.assertIn("email_verified", response.context)
+
+        self.assertEqual(response.context["user"].role, CustomUser.Role.ADMIN)
+
+        self.assertEqual(response.context["email_verified"], True)
+
+    def test_logged_in_vendor_can_access_dashboard(self):
+        self.login_as_vendor()
+        response = self.client.get(reverse("accounts:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTemplateUsed(response, "accounts/dashboard.html")
+
+        self.assertIn("user", response.context)
+        self.assertIn("my_resources", response.context)
+        self.assertIn("my_resource_count", response.context)
+        self.assertIn("my_favorites", response.context)
+        self.assertIn("my_favorites_count", response.context)
+        self.assertIn("email_verified", response.context)
+
+        self.assertEqual(response.context["user"].role, CustomUser.Role.VENDOR)
+
+        self.assertEqual(response.context["email_verified"], False)
