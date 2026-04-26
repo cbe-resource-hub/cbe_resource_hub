@@ -29,6 +29,14 @@ class CMSBaseTestCase(TestCase):
             key="contact_email",
             value="contact@example.com"
         )
+        cls.meta_description_site_setting = SiteSetting.objects.create(
+            key="meta_description",
+            value="Test meta description"
+        )
+        cls.meta_keywords_site_setting = SiteSetting.objects.create(
+            key="meta_keywords",
+            value="keyword 1, keyword 2, keyword 3"
+        )
         cls.primary_menu = Menu.objects.create(
             name="Primary Header",
         )

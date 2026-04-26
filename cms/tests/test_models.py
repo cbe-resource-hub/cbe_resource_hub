@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from django.utils.html import strip_tags
 
-from cms.models import Page
+from cms.models import Page, SiteSetting
 from cms.tests.base import CMSBaseTestCase
 
 
@@ -89,4 +89,58 @@ class TestCMSPageCreation(CMSBaseTestCase):
             Page.objects.create(
                 title="No is_published Page",
                 is_published=None,
+            )
+
+
+class TestCMSSiteSettingsCreation(CMSBaseTestCase):
+
+    def test_create_site_name_site_setting(self):
+        self.assertIsNotNone(self.site_name_site_setting)
+
+    def test_create_site_indexing_site_setting(self):
+        self.assertIsNotNone(self.site_indexing_site_setting)
+
+    def test_create_contact_phone_site_setting(self):
+        self.assertIsNotNone(self.contact_phone_site_setting)
+
+    def test_create_contact_email_site_setting(self):
+        self.assertIsNotNone(self.contact_email_site_setting)
+
+    def test_create_meta_description_site_setting(self):
+        self.assertIsNotNone(self.meta_description_site_setting)
+
+    def test_create_meta_keywords_site_setting(self):
+        self.assertIsNotNone(self.meta_keywords_site_setting)
+
+    def test_create_site_setting_with_duplicate_key_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.create(
+                key="site_name",
+                value="Test Duplicate key",
+            )
+
+    def test_create_site_setting_with_no_value_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.create(
+                key="no_value",
+                value=None,
+            )
+
+    def test_update_site_setting_with_no_value_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.filter(pk=self.site_name_site_setting.pk).update(
+                value=None,
+            )
+
+    def test_create_site_setting_with_no_key_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.create(
+                key=None,
+                value="no key"
+            )
+
+    def test_update_site_setting_with_no_key_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.filter(pk=self.site_name_site_setting.pk).update(
+                key=None,
             )
