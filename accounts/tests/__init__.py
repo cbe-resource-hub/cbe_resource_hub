@@ -4,6 +4,9 @@ from .test_admin_views import (
 )
 from .test_forms import ProfileFormTestCase
 from .test_models import TestUserCreation
+from .test_signals import (
+    EnsureSuperuserEmailVerifiedTests, ResetMustChangePasswordTests, GenerateUsernameFromEmailTests
+)
 from .test_views import (
     AccountsProfileViewTests, AccountsBecomeVendorViewTests, AccountsDashboardViewTests
 )
@@ -20,4 +23,7 @@ __all__ = [
     "AdminUserUpdateViewTests",
     "AdminUserDeleteViewTests",
     "AdminUserBulkToggleViewTests",
+    "EnsureSuperuserEmailVerifiedTests",
+    "ResetMustChangePasswordTests",
+    "GenerateUsernameFromEmailTests",
 ]

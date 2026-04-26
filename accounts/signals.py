@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 
+from allauth.account.models import EmailAddress
 from allauth.account.signals import password_changed
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -43,7 +44,6 @@ def ensure_superuser_email_verified(sender, instance, created: bool, **kwargs) -
         return
 
     try:
-        from allauth.account.models import EmailAddress
 
         obj, created_record = EmailAddress.objects.get_or_create(
             user=instance,
