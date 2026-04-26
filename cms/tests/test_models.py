@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils.html import strip_tags
 
-from cms.models import Page, SiteSetting, Menu
+from cms.models import Page, SiteSetting, Menu, MenuItem
 from cms.tests.base import CMSBaseTestCase
 
 
@@ -215,4 +215,86 @@ class TestCMSMenuCreation(CMSBaseTestCase):
         with self.assertRaises(ValidationError):
             Menu.objects.create(
                 name=self.long_title("t", 60),
+            ).full_clean()
+
+
+class TestCMSMenuItemsCreation(CMSBaseTestCase):
+
+    def test_create_primary_menu_item(self):
+        self.assertIsNotNone(self.home_primary_menu_item.pk)
+
+    def test_create_footer_menu_item(self):
+        self.assertIsNotNone(self.partners_footer_menu_item.pk)
+
+    def test_create_menu_item_with_no_menu_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.create(
+                menu=None,
+                title="No menu",
+                url="https://example.com",
+            )
+
+    def test_update_menu_item_with_no_menu_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.filter(pk=self.partners_footer_menu_item.pk).update(
+                menu=None,
+            )
+
+    def test_create_menu_item_with_no_title_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.create(
+                menu=self.primary_menu,
+                title=None,
+                url="https://example.com",
+            )
+
+    def test_update_menu_item_with_no_title_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.filter(pk=self.home_primary_menu_item.pk).update(
+                title=None,
+            )
+
+    def test_create_menu_item_with_no_url_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.create(
+                menu=self.primary_menu,
+                title="No URL",
+                url=None,
+            )
+
+    def test_update_menu_item_with_no_url_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.filter(pk=self.home_primary_menu_item.pk).update(
+                url=None,
+            )
+
+    def test_create_menu_item_with_null_order_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.create(
+                menu=self.primary_menu,
+                title="Null Order",
+                url="https://example.com",
+                order=None,
+            )
+
+    def test_update_menu_item_with_null_order_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            MenuItem.objects.filter(pk=self.home_primary_menu_item.pk).create(
+                order=None,
+            )
+
+    def test_create_menu_item_with_title_longer_than_max_length_raises_validation_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            MenuItem.objects.create(
+                menu=self.primary_menu,
+                title=self.long_title("t", 110),
+                url="https://example.com",
+            ).full_clean()
+
+    def test_create_menu_item_with_url_longer_than_max_length_raises_validation_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            MenuItem.objects.create(
+                menu=self.primary_menu,
+                title="Long URL",
+                url=f"https://{self.long_title("u", 500)}.com",
             ).full_clean()
