@@ -6,6 +6,10 @@ from .test_admin_views import (
     IsAdminMixinTests, AdminUserListViewTests, AdminUserCreateViewTests, AdminUserUpdateViewTests,
     AdminUserDeleteViewTests, AdminUserBulkToggleViewTests
 )
+from .test_django_admin import (
+    CustomUserAdminRegistrationTests, CustomUserAdminConfigTests, CustomUserAdminChangelistTests,
+    CustomUserAdminChangeFormTests, CustomUserAdminAddFormTests,
+)
 from .test_forms import ProfileFormTestCase
 from .test_models import TestUserCreation
 from .test_signals import (
@@ -36,4 +40,9 @@ __all__ = [
     "AccountAdapterSaveUserTests",
     "SocialAccountAdapterPreSocialLoginTests",
     "SocialAccountAdapterPopulateUserTests",
+    "CustomUserAdminRegistrationTests",
+    "CustomUserAdminConfigTests",
+    "CustomUserAdminChangelistTests",
+    "CustomUserAdminChangeFormTests",
+    "CustomUserAdminAddFormTests",
 ]
