@@ -53,3 +53,9 @@ class CMSBaseTestCase(TestCase):
             title="Partners",
             url="/partners/",
         )
+
+    def long_title(self, characters: str ,length: int) -> str:
+        long_title = characters * length
+        return long_title
+
+

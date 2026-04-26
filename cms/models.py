@@ -8,6 +8,7 @@ WordPress-like dynamic CMS functionality:
 """
 
 from django.db import models
+from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.text import slugify
@@ -29,7 +30,6 @@ class SiteSetting(models.Model):
 
     key: str = models.CharField(
         max_length=50,
-        unique=True,
         db_index=True,
         help_text='Setting identifier (e.g. "site_name", "contact_email", "contact_phone", "site_indexing").',
     )
@@ -41,6 +41,13 @@ class SiteSetting(models.Model):
         verbose_name = "Site Setting"
         verbose_name_plural = "Site Settings"
         ordering = ["key"]
+        constraints = [
+            models.UniqueConstraint(
+                Lower("key"),
+                name="unique_site_setting_key",
+                violation_error_message="Site Setting key must be unique"
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.key} = {self.value[:60]}"
@@ -62,7 +69,6 @@ class Menu(models.Model):
 
     name: str = models.CharField(
         max_length=50,
-        unique=True,
         help_text='Human-readable menu name (e.g. "Primary Header", "Footer").',
     )
 
@@ -72,6 +78,13 @@ class Menu(models.Model):
         verbose_name = "Menu"
         verbose_name_plural = "Menus"
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"),
+                name="unique_menu_name",
+                violation_error_message="Menu name must be unique"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name

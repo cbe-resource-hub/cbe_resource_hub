@@ -1,7 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils.html import strip_tags
 
-from cms.models import Page, SiteSetting
+from cms.models import Page, SiteSetting, Menu
 from cms.tests.base import CMSBaseTestCase
 
 
@@ -91,6 +92,19 @@ class TestCMSPageCreation(CMSBaseTestCase):
                 is_published=None,
             )
 
+    def test_page_create_with_title_longer_than_field_input_size_raises_value_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            Page.objects.create(
+                title=self.long_title("t", 300)
+            ).full_clean()
+
+    def test_page_create_with_slug_longer_than_field_input_size_raises_value_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            Page.objects.create(
+                title=self.long_title("t", 100),
+                slug=self.long_title("t", 300)
+            ).full_clean()
+
 
 class TestCMSSiteSettingsCreation(CMSBaseTestCase):
 
@@ -119,6 +133,13 @@ class TestCMSSiteSettingsCreation(CMSBaseTestCase):
                 value="Test Duplicate key",
             )
 
+    def test_create_site_setting_with_duplicate_key_but_different_casing_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            SiteSetting.objects.create(
+                key="SITE_NAME",
+                value="Test Duplicate key",
+            )
+
     def test_create_site_setting_with_no_value_raises_integrity_error(self):
         with self.assertRaises(IntegrityError):
             SiteSetting.objects.create(
@@ -144,3 +165,54 @@ class TestCMSSiteSettingsCreation(CMSBaseTestCase):
             SiteSetting.objects.filter(pk=self.site_name_site_setting.pk).update(
                 key=None,
             )
+
+    def test_create_site_setting_with_key_longer_than_max_length_raises_validation_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            SiteSetting.objects.create(
+                key=self.long_title("t", 60),
+            ).full_clean()
+
+
+class TestCMSMenuCreation(CMSBaseTestCase):
+
+    def test_create_primary_menu(self):
+        self.assertIsNotNone(self.primary_menu)
+
+    def test_create_footer_menu(self):
+        self.assertIsNotNone(self.footer_menu)
+
+    def test_create_menu_with_duplicate_name_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            Menu.objects.create(
+                name="Primary Header"
+            )
+
+    def test_create_menu_with_duplicate_name_but_different_casing_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            Menu.objects.create(
+                name="footer"
+            )
+
+    def test_update_menu_with_duplicate_name_but_different_casing_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            Menu.objects.create(
+                name="DUPLICATE"
+            )
+            Menu.objects.create(
+                name="duplicate1"
+            )
+            Menu.objects.filter(name="duplicate1").update(
+                name="DUPLICATE"
+            )
+
+    def test_create_menu_with_no_name_raises_integrity_error(self):
+        with self.assertRaises(IntegrityError):
+            Menu.objects.create(
+                name=None
+            )
+
+    def test_create_menu_with_name_longer_than_max_length_raises_validation_error_on_full_clean(self):
+        with self.assertRaises(ValidationError):
+            Menu.objects.create(
+                name=self.long_title("t", 60),
+            ).full_clean()

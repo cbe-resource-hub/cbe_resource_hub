@@ -40,12 +40,24 @@ MIDDLEWARE = list(MAIN_MIDDLEWARE)
 
 # ── Local filesystem storage (no external deps) ───────────────────────────────
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    "protected": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "public_files": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": "test-default"},
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "OPTIONS": {"location": "test-static"},
+    },
+    "protected": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": "test-protected"},
+    },
+    "public_files": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": "test-public-files"},
+    },
     "dbbackup": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
-        "OPTIONS": {"location": "database-backups"},
+        "OPTIONS": {"location": "test-database-backups"},
     },
 }
