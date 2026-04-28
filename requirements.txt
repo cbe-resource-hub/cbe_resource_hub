@@ -347,9 +347,9 @@ django==6.0.4 \
     #   django-tinymce
     #   django-widget-tweaks
     #   slippers
-django-allauth==65.15.1 \
-    --hash=sha256:94c5b9df0c3458019613983ba9e938518acf5c2e4cc6e0f262fc3684ffe45a95 \
-    --hash=sha256:c32a1031f5601cb66b0aba276fb482d5d1460045a8094795a4db2af0231ee432
+django-allauth==65.16.1 \
+    --hash=sha256:4425ac3088541c4c54983e16e08f6e3eb9f438dc1b1009534fa51c8bb739ed31 \
+    --hash=sha256:e49df24056bf37c44e56aaad1e51f78994b7d175bc3476d65e8f8f58390a8ce8
     # via cbe-resource-hub
 django-allauth-ui==1.8.1 \
     --hash=sha256:306d0ebe013181a1972b6e1d2ecaf911e95e247dfb1df50d05a794cad7dca84e \
@@ -371,9 +371,9 @@ django-cors-headers==4.9.0 \
     --hash=sha256:15c7f20727f90044dcee2216a9fd7303741a864865f0c3657e28b7056f61b449 \
     --hash=sha256:fe5d7cb59fdc2c8c646ce84b727ac2bca8912a247e6e68e1fb507372178e59e8
     # via cbe-resource-hub
-django-dbbackup==5.2.0 \
-    --hash=sha256:540948869e44778b5b33333cbab0cfe44279defd47df635d309ede8666894370 \
-    --hash=sha256:72b11dd31758abcf8f2d405fd2efbc49c9624bc17196f8c68542d3dc8d8d53c3
+django-dbbackup==5.3.0 \
+    --hash=sha256:2c880dba7650539e8a724174fedb5213062c4fcda3aa09e1c5f3f573192106cb \
+    --hash=sha256:ff80b5facd524e3f6479235aeb330b094a1c982f8b0b9503c24ba0dc613162ed
     # via cbe-resource-hub
 django-phonenumber-field==8.4.0 \
     --hash=sha256:2b83e843dac35eec6a69880a166487235b737a71a1e38c9a52e5ad67d6996083 \
@@ -383,9 +383,9 @@ django-redis==6.0.0 \
     --hash=sha256:20bf0063a8abee567eb5f77f375143c32810c8700c0674ced34737f8de4e36c0 \
     --hash=sha256:2d9cb12a20424a4c4dde082c6122f486628bae2d9c2bee4c0126a4de7fda00dd
     # via cbe-resource-hub
-django-smart-ratelimit==2.2.0 \
-    --hash=sha256:0a16aa246a85a120f2bf3576677f0dc5caae1c2b889b929c20e0d1a4a9c10a96 \
-    --hash=sha256:1ddda32de08762e3e5cff0c42cbaaeb1492d16059e278b1df8cc421b6ae3f0b3
+django-smart-ratelimit==2.2.1 \
+    --hash=sha256:3a4cc42c5a10e38d4069d3a730c1de7c7404f350a3c6753622a1274a87a20931 \
+    --hash=sha256:80cc34b5b0803cbaa348c420fb53cd79ac72008a7f41118d02200df716585d6d
     # via cbe-resource-hub
 django-storages==1.14.6 \
     --hash=sha256:11b7b6200e1cb5ffcd9962bd3673a39c7d6a6109e8096f0e03d46fab3d3aabd9 \
@@ -573,9 +573,9 @@ packaging==26.0 \
     #   gunicorn
     #   incremental
     #   kombu
-phonenumbers==9.0.27 \
-    --hash=sha256:a7ba9f362e2fe8e2d6756e415cf44f4c8f0c33b40ba07b27a8450909021d7e37 \
-    --hash=sha256:f99f533cfb052546d181f6dbd981bfbdd6a1527784585482173ff95ae6d1602e
+phonenumbers==9.0.29 \
+    --hash=sha256:0eb26e0c578aa2d56428330d5b4a0a07dac9a452c4387bf76a76a88b1e839ab7 \
+    --hash=sha256:66455e5c5ca4197aca5a4217d0dc82717a22038292cfa322d5d5e7c46934a214
     # via cbe-resource-hub
 pillow==12.2.0 \
     --hash=sha256:00a2865911330191c0b818c59103b58a5e697cae67042366970a6b6f1b20b7f9 \
@@ -818,9 +818,9 @@ s3transfer==0.16.0 \
     # via
     #   boto3
     #   cbe-resource-hub
-sentry-sdk==2.57.0 \
-    --hash=sha256:4be8d1e71c32fb27f79c577a337ac8912137bba4bcbc64a4ec1da4d6d8dc5199 \
-    --hash=sha256:812c8bf5ff3d2f0e89c82f5ce80ab3a6423e102729c4706af7413fd1eb480585
+sentry-sdk==2.58.0 \
+    --hash=sha256:688d1c704ddecf382ea3326f21a67453d4caa95592d722b7c780a36a9d23109e \
+    --hash=sha256:c1144d947352d54e5b7daa63596d9f848adf684989c06c4f5a659f0c85a18f6f
     # via cbe-resource-hub
 service-identity==24.2.0 \
     --hash=sha256:6b047fbd8a84fd0bb0d55ebce4031e400562b9196e1e0d3e0fe2b8a59f6d4a85 \
