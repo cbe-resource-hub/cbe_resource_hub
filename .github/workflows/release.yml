@@ -62,12 +62,14 @@ jobs:
             -e REDIS_PORT=6379 \
             -e REDIS_PASSWORD= \
             -e EMAIL_HOST=smtp.gmail.com \
+            -e EMAIL_PORT=587 \
+            -e EMAIL_USE_TLS=True \
             -e EMAIL_HOST_USER=test@example.com \
             -e EMAIL_HOST_PASSWORD=test \
             -e DEFAULT_FROM_EMAIL=test@example.com \
             -e SITE_URL=http://localhost:8006 \
             -e SITE_NAME=TestSite \
-            -e GOOGLE_OATH_CLIENT_ID=google_oauth_test_client_id \
+            -e GOOGLE_OAUTH_CLIENT_ID=google_oauth_test_client_id \
             -e GOOGLE_OAUTH_CLIENT_SECRET=google_oauth_test_secret_key \
             -e SITE_ID=1 \
             -e ADMIN_NAME=admin \

@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
 
 env:
   PYTHON_VERSION: ${{ vars.PYTHON_VERSION || '3.12' }}
@@ -20,11 +20,9 @@ jobs:
     services:
       redis:
         image: redis:8-alpine
-        ports: ["6379:6379"]
+        ports: [ "6379:6379" ]
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s
           --health-retries 5
 
     steps:
@@ -55,12 +53,14 @@ jobs:
             -e REDIS_PORT=6379 \
             -e REDIS_PASSWORD= \
             -e EMAIL_HOST=smtp.gmail.com \
+            -e EMAIL_PORT=587 \
+            -e EMAIL_USE_TLS=True \
             -e EMAIL_HOST_USER=test@example.com \
             -e EMAIL_HOST_PASSWORD=test \
             -e DEFAULT_FROM_EMAIL=test@example.com \
             -e SITE_URL=http://localhost:8006 \
             -e SITE_NAME=TestSite \
-            -e GOOGLE_OATH_CLIENT_ID=google_oauth_test_client_id \
+            -e GOOGLE_OAUTH_CLIENT_ID=google_oauth_test_client_id \
             -e GOOGLE_OAUTH_CLIENT_SECRET=google_oauth_test_secret_key \
             -e SITE_ID=1 \
             -e ADMIN_NAME=admin \
@@ -76,7 +76,7 @@ jobs:
   build:
     name: Build & Push Image
     runs-on: ubuntu-latest
-    needs: [tests]
+    needs: [ tests ]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
