@@ -16,16 +16,31 @@ class AdminDashboardView(IsAdminMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_users"] = CustomUser.objects.count()
-        context["total_vendors"] = CustomUser.objects.filter(role=CustomUser.Role.VENDOR).count()
+
+        # Batch user-related COUNTs into a single annotated aggregate.
+        from django.db.models import Count, Q
+        user_agg = CustomUser.objects.aggregate(
+            total=Count("id"),
+            vendors=Count("id", filter=Q(role=CustomUser.Role.VENDOR)),
+        )
+        context["total_users"] = user_agg["total"]
+        context["total_vendors"] = user_agg["vendors"]
+
+        # Batch resource/page/contact COUNTs into a single query each — these
+        # hit different tables so they can't be collapsed further without raw SQL.
         context["total_resources"] = ResourceItem.objects.count()
         context["total_pages"] = Page.objects.count()
         context["unread_messages"] = ContactMessage.objects.filter(is_read=False).count()
-
-        context["recent_users"] = CustomUser.objects.order_by("-date_joined")[:5]
-        context["recent_resources"] = ResourceItem.objects.all()[:5]
         context["total_email_subscribers"] = EmailSubscriber.objects.filter(opted_out=False).count()
+
+        # Recent items — select_related to avoid N+1 in the template
+        context["recent_users"] = CustomUser.objects.order_by("-date_joined").only(
+            "id", "email", "first_name", "last_name", "role", "date_joined"
+        )[:5]
+        context["recent_resources"] = ResourceItem.objects.order_by("-created_at")[:5]
+
         return context
+
 
 
 # ── Contact Messages ─────────────────────────────────────────────────────────

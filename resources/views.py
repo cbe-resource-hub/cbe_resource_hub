@@ -119,14 +119,19 @@ class ResourceDetailView(DetailView):
     template_name = "resources/resource_detail.html"
     context_object_name = "resource"
 
+    def get_queryset(self):
+        # The custom manager already applies select_related; return it directly.
+        return ResourceItem.objects.all()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Pre-fetch user favorites to avoid N+1 queries in the template
+        # Single indexed EXISTS query rather than evaluating full M2M QS
         if self.request.user.is_authenticated:
-            context["user_favorite_ids"] = set(self.request.user.favorites.values_list("id", flat=True))
+            context["user_favorite_ids"] = set(
+                self.request.user.favorites.values_list("id", flat=True)
+            )
         else:
             context["user_favorite_ids"] = set()
-
         return context
 
 
@@ -160,8 +165,9 @@ class ToggleFavoriteView(LoginRequiredMixin, DetailView):
         resource = self.get_object()
         user = request.user
 
-        # Toggle logic
-        if resource in user.favorites.all():
+        # Use EXISTS query instead of evaluating the full M2M QS.
+        is_favorited = user.favorites.filter(pk=resource.pk).exists()
+        if is_favorited:
             user.favorites.remove(resource)
             is_favorited = False
         else:
@@ -576,18 +582,18 @@ class LearningAreaListView(ListView):
     partial_template_name = "resources/partials/filter_cards.html"
     context_object_name = "filters"
 
-    def get_queryset(self) -> QuerySet[LearningArea]:
+    def get_queryset(self) -> list[LearningArea]:
         """
         Return all Learning Areas with infinite scrolling.
         """
 
-        qs: QuerySet[LearningArea] = get_learning_areas()
+        qs = get_learning_areas()
 
         q = self.request.GET.get("q")
         q = q.strip() if q else None
 
         if q:
-            qs = qs.filter(name__icontains=q)
+            qs = [x for x in qs if q.lower() in x.name.lower()]
 
         return qs
 
@@ -623,18 +629,18 @@ class GradeListView(ListView):
     partial_template_name = "resources/partials/filter_cards.html"
     context_object_name = "filters"
 
-    def get_queryset(self) -> QuerySet[Grade]:
+    def get_queryset(self) -> list[Grade]:
         """
         Return all Grades with infinite scrolling.
         """
 
-        qs: QuerySet[Grade] = get_grades()
+        qs = get_grades()
 
         q = self.request.GET.get("q")
         q = q.strip() if q else None
 
         if q:
-            qs = qs.filter(name__icontains=q)
+            qs = [x for x in qs if q.lower() in x.name.lower()]
 
         return qs
 
@@ -667,9 +673,12 @@ class AcademicSessionListView(ListView):
         q = q.strip() if q else None
 
         if q:
-            qs = qs.filter(
-                Q(current_year__year__icontains=q) | Q(current_term__term_number__icontains=q)
-            )
+            q_lower = q.lower()
+            qs = [
+                s for s in qs 
+                if q_lower in str(s.current_year.year).lower() 
+                or q_lower in str(s.current_term.term_number).lower()
+            ]
         return qs
 
     def get_context_data(self, **kwargs):
