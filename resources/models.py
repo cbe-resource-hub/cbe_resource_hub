@@ -233,6 +233,7 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
                     # Other
                     "application/rtf",
                     "application/epub+zip",
+                    "application/pdf",
                 }
             )
         ],
