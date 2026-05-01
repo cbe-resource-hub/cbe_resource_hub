@@ -1,0 +1,259 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  compose.prod.yaml — CBE Resource Hub  (Dokploy / Coolify / external proxy)║
+# ║  Copy-paste ready: Dokploy · Coolify · plain Docker Compose v2              ║
+# ║                                                                              ║
+# ║  TOPOLOGY                                                                     ║
+# ║    External proxy (Dokploy/Coolify Traefik on 80/443)                        ║
+# ║      └─► web ×3 replicas (Gunicorn, load-balanced)                          ║
+# ║            └─► postgres (co-located) + redis                                ║
+# ║    celery_worker · celery_beat (backend only)                                ║
+# ║    watchtower (rolling restart, app images only)                             ║
+# ║                                                                              ║
+# ║  SSL is terminated at the domain level:                                      ║
+# ║    · Cloudflare → HTTPS (full/strict)                                        ║
+# ║    · Platform Traefik (Dokploy/Coolify) → HTTP to containers                 ║
+# ║  No TLS configuration in this file.                                          ║
+# ║                                                                              ║
+# ║  Networking                                                                  ║
+# ║    All services are on the internal `backend` network.                       ║
+# ║    The web service also joins an EXTERNAL network `proxy` — this is where    ║
+# ║    the platform’s Traefik listens (Dokploy uses `dokploy`, Coolify uses      ║
+# ║    `coolify`).  Adjust the external network name below to match your         ║
+# ║    platform.                                                                 ║
+# ║                                                                              ║
+# ║  Server baseline: 4 vCPU / 10 GB RAM                                        ║
+# ║  Static/media   : Cloudflare R2 (no local volume needed)                    ║
+# ║                                                                              ║
+# ║  BEFORE FIRST DEPLOY                                                         ║
+# ║    1. cp .env.prod.example .env.prod  →  fill in real values                ║
+# ║    2. Create the external network:                                           ║
+# ║         docker network create proxy                                          ║
+# ║       (or use the platform’s default, e.g. `docker network create dokploy`) ║
+# ║                                                                              ║
+# ║  Deploy                                                                      ║
+# ║    docker compose -f compose.prod.yaml pull                                  ║
+# ║    docker compose -f compose.prod.yaml up -d --remove-orphans                ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ── YAML anchors (avoid repetition) ──────────────────────────────────────────
+
+x-image: &app-image paulmbui/cbe_resource_hub:1.0.2
+
+x-app-env: &app-env
+  env_file: [.env]
+
+x-sec: &sec
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+
+x-log: &log
+  logging:
+    driver: json-file
+    options: {max-size: "10m", max-file: "3"}
+
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # REDIS — Celery broker + result backend
+  # ══════════════════════════════════════════════════════════════════════════
+  redis:
+    image: redis:8-alpine
+    user: root
+    restart: unless-stopped
+    command: [ "redis-server", "--appendonly", "yes" , "--maxmemory 256mb", "--maxmemory-policy allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 3s
+      retries: 2
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # WEB — Gunicorn/Django  ×3 replicas
+  #
+  # Gunicorn: --workers=2 --threads=2  (4 concurrent requests per replica)
+  #
+  # Rolling update (Watchtower):
+  #   replica 1 stops → proxy drains it → new image starts → healthcheck
+  #   passes → proxy resumes routing → repeat for replicas 2 & 3.
+  #
+  # Must use Redis-backed sessions (not DB sessions) for multi‑replica.
+  #   SESSION_ENGINE=django.contrib.sessions.backends.cache
+  #   SESSION_CACHE_ALIAS=default  (pointing to Redis in CACHES setting)
+  # ══════════════════════════════════════════════════════════════════════════
+  web:
+    image: *app-image
+    restart: unless-stopped
+    <<: [*app-env, *sec, *log]
+    command: ["./build.sh"]
+    expose:
+      - "8000"
+    depends_on:
+      redis:    {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python3", "./docker-health-check.py"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 20s
+        failure_action: rollback
+      resources:
+        limits:       {cpus: "0.80", memory: 512M}
+        reservations: {cpus: "0.25", memory: 256M}
+    networks:
+      - dokploy-network      # external proxy (Dokploy/Coolify Traefik)
+      - backend    # redis
+    labels:
+      # ── Traefik routing (no TLS ─ platform handles it) ────────────────
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.web.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web.entrypoints=web"          # plain HTTP
+      - "traefik.http.services.web.loadbalancer.server.port=8000"
+
+      # Active health‑check on the proxy side
+      - "traefik.http.services.web.loadbalancer.healthcheck.path=/health/"
+      - "traefik.http.services.web.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.web.loadbalancer.healthcheck.timeout=5s"
+
+      # ── Security middlewares (applied before the backend) ─────────────
+      - "traefik.http.middlewares.app-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.app-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.app-headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.app-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.app-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.app-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.app-headers.headers.referrerPolicy=strict-origin-when-cross-origin"
+
+      # Rate limiting: 20 req/s sustained, burst to 50
+      - "traefik.http.middlewares.app-ratelimit.ratelimit.average=20"
+      - "traefik.http.middlewares.app-ratelimit.ratelimit.burst=50"
+
+      # Attach middlewares to the router
+      - "traefik.http.routers.web.middlewares=app-headers,app-ratelimit"
+
+      # ── Watchtower ───────────────────────────────────────────────────
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # CELERY WORKER
+  # ══════════════════════════════════════════════════════════════════════════
+  celery_worker:
+    image: *app-image
+    restart: unless-stopped
+    <<: [*app-env, *sec, *log]
+    command: >
+      celery -A cbe_res_hub worker
+        --loglevel=info
+        --concurrency=4
+        --prefetch-multiplier=1
+        --max-tasks-per-child=200
+        --max-memory-per-child=200000
+    depends_on:
+      redis:    {condition: service_healthy}
+      web:      {condition: service_healthy}
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "celery -A cbe_res_hub inspect ping -d celery@$$HOSTNAME --timeout 5 || exit 1"
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    deploy:
+      replicas: 1
+      resources:
+        limits:       {cpus: "0.80", memory: 512M}
+        reservations: {cpus: "0.25", memory: 256M}
+    networks:
+      - backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # CELERY BEAT — periodic task scheduler (⚠ replicas must be exactly 1)
+  # ══════════════════════════════════════════════════════════════════════════
+  celery_beat:
+    image: *app-image
+    restart: unless-stopped
+    <<: [*app-env, *sec, *log]
+    command: >
+      celery -A cbe_res_hub beat
+        --loglevel=info
+    depends_on:
+      redis:         {condition: service_healthy}
+      celery_worker: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A cbe_res_hub inspect ping --timeout 5 || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    deploy:
+      replicas: 1
+      resources:
+        limits:       {cpus: "0.20", memory: 256M}
+        reservations: {cpus: "0.05", memory: 128M}
+    networks:
+      - backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ══════════════════════════════════════════════════════════════════════════
+  # WATCHTOWER — automatic rolling image updates
+  # ══════════════════════════════════════════════════════════════════════════
+  watchtower:
+    image: nickfedor/watchtower:1
+    restart: unless-stopped
+    <<: [*app-env, *sec,]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "--cleanup"
+      - "--label-enable"
+      - "--rolling-restart"
+      - "--interval"
+      - "86400"
+      - "--notifications"
+      - "email"
+    depends_on:
+      web:
+        condition: service_healthy
+      celery_worker:
+        condition: service_healthy
+      celery_beat:
+        condition: service_healthy
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  dokploy-network:
+    external: true
+    name: dokploy-network
+
+  backend:
+    # Internal mesh: web ↔ redis ↔ celery.
+    # No direct outbound internet from this network (unless a container is
+    # also attached to another network). This keeps your data‑plane traffic
+    # isolated.
+    driver: bridge
+    internal: true
+
+
+# docker pull paulmbui/cbe_resource_hub:latest && docker compose -f compose.prod.yaml up
