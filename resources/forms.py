@@ -14,7 +14,7 @@ class ResourceItemForm(forms.ModelForm):
             "learning_area",
             "academic_session",
             "file",
-            "is_free",  #'price',
+            "is_free",
             "focus_keyword",
             "meta_title",
             "meta_description",
@@ -57,5 +57,20 @@ class ResourceItemForm(forms.ModelForm):
                     "class": "w-4 h-4 text-brand-primary bg-white/5 border-white/10 rounded focus:ring-brand-primary focus:ring-2",
                 }
             ),
-            # 'price': forms.NumberInput(attrs={'class': 'w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-brand-primary'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # These fields are auto-generated in model save() if not provided,
+        # so they should not be required in the form.
+        optional_fields = [
+            "slug",
+            "focus_keyword",
+            "meta_title",
+            "meta_description",
+            "meta_keywords",
+            "featured_image",
+        ]
+        for field in optional_fields:
+            if field in self.fields:
+                self.fields[field].required = False

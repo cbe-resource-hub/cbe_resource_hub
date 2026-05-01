@@ -631,7 +631,7 @@ uv run pytest tests/
 uv run pytest --cov=. --cov-report=html
 ```
 
-> **1 395 tests across all apps** — settings validation, unit tests, integration
+> **1,480+ tests across all apps** — settings validation, unit tests, integration
 > flows, file upload concurrency, performance baselines, and admin CRUD all run
 > at 100% pass rate in CI.
 

@@ -304,8 +304,10 @@ class ResourceItem(SEOModel, SlugRedirectMixin, models.Model):
 
     def save(self, *args, **kwargs) -> None:
         if self.title:
-            self.slug = slugify(self.title[:265])
-            self.meta_title = self.title[:60]
+            if not self.slug:
+                self.slug = slugify(self.title[:265])
+            if not self.meta_title:
+                self.meta_title = self.title[:60]
         if self.description and not self.meta_description:
             self.meta_description = strip_tags(self.description)[:160]
         if self.is_free:
