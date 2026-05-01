@@ -4,7 +4,6 @@ website/models.py
 Stores submitted contact form messages so admins can read and manage
 them from the custom management panel.
 """
-from __future__ import annotations
 
 from django.db import models
 from django.db.models.functions import Lower
@@ -15,6 +14,7 @@ from tinymce.models import HTMLField
 
 from core.models import TimeStampedModel
 from seo.models import SEOModel, SlugRedirectMixin
+from validators import validate_image_file
 
 
 class ContactMessage(models.Model):
@@ -53,21 +53,22 @@ class Partner(SEOModel, SlugRedirectMixin, models.Model):
     slug = models.SlugField(max_length=255, null=True, blank=True)
     description = HTMLField(null=True, blank=True)
     logo = models.ImageField(
-        upload_to='partners/logos/',
+        upload_to="partners/logos/",
         null=True,
         blank=True,
-        help_text='Partner logo image (displayed on listings and banners).',
+        validators=[validate_image_file],
+        help_text="Partner logo image (displayed on listings and banners).",
     )
     show_as_banner = models.BooleanField(
         default=False,
         db_index=True,
-        help_text='Show this partner as a banner/ad strip on the public website.',
+        help_text="Show this partner as a banner/ad strip on the public website.",
     )
     banner_cta = models.CharField(
         max_length=80,
         blank=True,
-        default='Learn More',
-        help_text='Call-to-action button text shown on the banner.',
+        default="Learn More",
+        help_text="Call-to-action button text shown on the banner.",
     )
 
     def delete(self, using=None, keep_parents=False):
@@ -78,7 +79,7 @@ class Partner(SEOModel, SlugRedirectMixin, models.Model):
         return super().delete(using=using, keep_parents=keep_parents)
 
     def save(self, *args, **kwargs):
-        if not self.slug or self.slug == '':
+        if not self.slug or self.slug == "":
             self.slug = slugify(self.name)
         if self.name and not self.meta_title:
             self.meta_title = self.name
@@ -87,7 +88,11 @@ class Partner(SEOModel, SlugRedirectMixin, models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} Partner on URL {self.link} added on {self.created_at}" if self.link else f"{self.name} Partner"
+        return (
+            f"{self.name} Partner on URL {self.link} added on {self.created_at}"
+            if self.link
+            else f"{self.name} Partner"
+        )
 
     class Meta:
         ordering = ["-created_at"]
@@ -98,16 +103,16 @@ class Partner(SEOModel, SlugRedirectMixin, models.Model):
                 violation_error_message="Partner with this name already exists",
             ),
             models.UniqueConstraint(
-                fields=['link'],
+                fields=["link"],
                 name="unique_partner_url",
                 violation_error_message="Partner with this url already exists",
-                condition=models.Q(link__isnull=False)
+                condition=models.Q(link__isnull=False),
             ),
         ]
 
 
 class EmailSubscriber(TimeStampedModel, models.Model):
-    full_name = models.CharField(max_length=255, blank=True, default='')
+    full_name = models.CharField(max_length=255, blank=True, default="")
     email = models.EmailField(unique=True)
     opted_out = models.BooleanField(default=False)
 
@@ -118,5 +123,3 @@ class EmailSubscriber(TimeStampedModel, models.Model):
         verbose_name = "Email Subscriber"
         verbose_name_plural = "Email Subscribers"
         ordering = ["-created_at"]
-
-
